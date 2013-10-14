@@ -3,7 +3,7 @@ package main
 import (
   "fmt"
   "flag"
-  "github.com/relaynetwork/rn-sandbox/golang/abtab"
+  "github.com/kyleburton/go-abtab"
   "os"
 )
 
