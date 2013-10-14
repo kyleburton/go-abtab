@@ -1,0 +1,176 @@
+h1. Abstract Table Utilities
+
+Tab is the core file format.  By default, files are expected to have a header line describing the columns in the file.
+
+FieldSeparator='\t'
+RecordSeparator='\n'
+
+
+'Memo' fields, and embedded delimiters:
+  Embedded Newlines represnted as '\n'
+  Embedded Tabs represnted as '\t'
+  Embedded CR represnted as '\r'
+
+Examples:
+
+'cat' a tab delimited file (no-op):
+
+  abcat -i foo.tab
+
+All utilities supoprt using a URL to specify the encoding:
+
+  abcat -i tab://foo.tab
+
+Convert from CSV to TAB:
+
+  abcat -i csv://foo.csv -o tab://foo.tab
+
+View a 'portrait' mode of the records in a file:
+
+  abview -i csv://foo.csv
+
+Cut columns out of a file:
+  # Id Created_At Updated_At Email_Address
+  abcut -i csv://foo.csv -f Id,First_Name,Last_Name
+  abcut -i csv://foo.csv -n 1,5,6
+
+Grep for lines
+
+  abgrep -i csv://foo.csv -e 'First_Name == "Bob"'
+  abgrep -i csv://foo.csv -e 'lnum >= 300 && lnum < 400'
+
+The expression is wrapped inside of the equivalent of a go function:
+
+  func expr (lnum int64, rec *[]string, Id, Created_At, Updated_At, Email_Address, First_Name, Last_Name *string) bool {
+    return ...expression...
+  }
+
+Head and Tail
+
+Header plus the first 100 records:
+
+  abhead -i csv://foo.csv -n 100
+
+Header plus the last 100 records:
+
+  abtail -i csv://foo.csv -n 100
+
+Header, skips the first 100 records, emits the rest:
+
+  abtail -i csv://foo.csv -n +100
+
+Sorting
+
+  absort -i csv://foo.csv -f Last_Name,First_Name
+
+Joining/Merging
+
+TBD
+
+Expressions have access to the record number in the stream (lnum), the array of field values (rec) and each of the declared fields.
+
+Modify a source: add columns, apply an expression to records.
+
+h2. Common Command Line Options
+
+* -tmp /path/to/tmp
+
+Specfiy an alternatvie temp directory to use.
+
+
+h2. URL Encoding
+
+h3. Schema
+
+Schema correlates to the driver / file encoding.
+
+h3. Path
+
+Path correlates to the file path to read from or write to.  You can interaact
+with stdin/stdout on Unix by specifying file paths of /dev/stdin and
+/dev/stdout respectively.  Drivers may interpret these differently, ex:
+database drivers would interpret the first parts of the path as the database
+host, schema and table name.
+
+h3. Query String
+
+These are for common options and driver specific options.
+
+h5. Common Options
+
+* header=f1,f2,f3
+
+Specify the header for a file if it does not have one of its own.
+
+* -header
+
+Indicates the source has no header and that one should be fabricated (F1, F2, F3, ...).
+
+* skipLines=N
+
+Indicates to skip the first N lines of the source.
+
+h2. Supported Drivers
+
+h3. tab
+
+h3. csv
+
+h3. fixed
+
+future
+
+h3. xls
+
+future
+
+h3. pg
+
+future
+
+h3. mysql
+
+future
+
+h1. Examples
+
+<pre>
+  go build && ./abtab -task cat -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count"
+  go build && ./abtab -task cat -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" -o csv:///dev/stdin
+  go build && ./abtab -task fill-rates -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count"
+
+  go build && ./abtab -task grep -e 'Substr(Name,-1,0) == "y"' -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" 2>&1 | less
+
+</pre>
+
+
+TODO:
+
+* implement an installer, and cmdline wrappers (abcat, abview, abgrep, ...)
+** make installation as simple as possible for the end-user, minimal pre-requisits
+* documentation: packages, apis, examples, command line utilities
+* implement driver interface and types
+** DONE driver type/struct
+** DONE url parsing
+** driver options
+* DONE implement tab driver
+* DONE implement csv driver
+* DONE implement abcat utility
+* implement support for memo fields in tab driver (embedded newlines and tabs, escape on input, unescape on output)
+* implement abcut utility
+* implement abhead utility
+* implement abtail utility
+* DONE implement abview utility
+* DONE implement abgrep utility
+** DONE fork https://github.com/sbinet/go-eval
+*** DONE make all necessary types public, or otherwise determine how to inject variables into the interpreter
+*** DONE embed the go-eval interpreter into grep in order to evaluate expressions per record
+* DONE re-write grep's expression fn as a stream filter
+* extend the 'standard library' for abgrep's expression language
+* implement absort utility
+* implement abmod driver
+* implement fixed driver
+* implement pg driver
+* implement mysql driver
+
+

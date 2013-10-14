@@ -1,0 +1,14 @@
+Record[1] # tab:///dev/stdin
+[ 1] place         : Stratford
+[ 2] rn            : 1422.00
+[ 3] year of birth : 1603.00
+[ 4] gname-r       : Maria
+[ 5] gname         : Mary
+
+Record[2] # tab:///dev/stdin
+[ 1] place         : Stratford
+[ 2] rn            : 1423.00
+[ 3] year of birth : 1603.00
+[ 4] gname-r       : Elizabeth
+[ 5] gname         : Elizabet
+
