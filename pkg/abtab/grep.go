@@ -5,7 +5,7 @@ import (
   "strconv"
   "strings"
   "go/token"
-  "github.com/kyleburton/go-eval"
+  "github.com/kyleburton/go-eval/pkg/eval"
 )
 
 func init () {
