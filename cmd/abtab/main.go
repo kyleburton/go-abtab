@@ -3,7 +3,7 @@ package main
 import (
   "fmt"
   "flag"
-  "github.com/kyleburton/go-abtab"
+  "github.com/kyleburton/go-abtab/pkg/abtab"
   "os"
 )
 
