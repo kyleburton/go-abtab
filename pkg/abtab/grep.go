@@ -6,10 +6,13 @@ import (
   "strconv"
   "strings"
   "go/token"
+  "math/rand"
+  "time"
   "github.com/kyleburton/go-eval/pkg/eval"
 )
 
 func init () {
+  rand.Seed( time.Now().UTC().UnixNano())
 }
 
 func libParseInt (th *eval.Thread, in []eval.Value, out []eval.Value) {
@@ -57,6 +60,19 @@ func libSubstr (th *eval.Thread, in []eval.Value, out []eval.Value) {
   out[0] = eval.ToValue(res)
 }
 
+func libRandInt (th *eval.Thread, in []eval.Value, out []eval.Value) {
+  res, err := strconv.ParseInt(in[0].String(), 10, 64)
+  if err != nil {
+    panic(err)
+  }
+  v := int(rand.Float64() * float64(res))
+  out[0] = eval.ToValue(v)
+}
+
+func libRandFloat (th *eval.Thread, in []eval.Value, out []eval.Value) {
+  out[0] = eval.ToValue(rand.Float64())
+}
+
 type LibEntry struct {
   Name   string
   Fn     func(*eval.Thread, []eval.Value, []eval.Value)
@@ -68,6 +84,14 @@ var StandardLibrary []LibEntry = []LibEntry {
    Type: eval.NewFuncType( []eval.Type { eval.StringType, },
                                          false,
                                          []eval.Type { eval.Int64Type, })},
+  {Name: "RandInt", Fn: libRandInt, 
+   Type: eval.NewFuncType( []eval.Type { eval.Int64Type, },
+                                         false,
+                                         []eval.Type { eval.Int64Type, })},
+  {Name: "RandFloat", Fn: libRandFloat, 
+   Type: eval.NewFuncType( []eval.Type {},
+                                         false,
+                                         []eval.Type { eval.Float64Type, })},
   {Name: "ParseFloat", Fn: libParseFloat, 
    Type: eval.NewFuncType( []eval.Type { eval.StringType, },
                                          false,

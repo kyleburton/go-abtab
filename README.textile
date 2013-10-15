@@ -68,6 +68,12 @@ Grep for lines
   abgrep -i csv://foo.csv -e '__LINE__ >= 300 && __LINE__ < 400'
 </pre>
 
+Flip a coin for each line:
+
+<pre>
+  abgrep -e 'RandFloat()>0.5' -i tab://foo.tab
+</pre>
+
 The expression is evaluated using: https://github.com/kyleburton/go-eval, a restricted sub-set of the go language.  There will be a pre-defined variable for each field in the row as well all @__LINE__@ which contains the current record number.
 
 Head and Tail
@@ -195,6 +201,7 @@ TODO:
 * DONE re-write grep's expression fn as a stream filter
 * extend the 'standard library' for abgrep's expression language
 ** what does this need to be useful?
+* DONE abgrep: implement Rand() functions
 * implement pg driver
 * implement absort utility
 * implement abmod driver
