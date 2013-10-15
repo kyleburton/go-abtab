@@ -113,9 +113,9 @@ func (self *AbtabURL) OpenRead () error {
 //  case "fixed" == self.Url.Scheme:
 //    self.FixedOpenRead()
 //    break;
-//  case "pg" == self.Url.Scheme:
-//    self.PgOpenRead()
-//    break;
+  case "pg" == self.Url.Scheme:
+    self.PgOpenRead()
+    break;
 //  case "mysql" == self.Url.Scheme:
 //    self.MysqlOpenRead()
 //    break;
