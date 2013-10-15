@@ -68,29 +68,33 @@ Grep for lines
   abgrep -i csv://foo.csv -e '__LINE__ >= 300 && __LINE__ < 400'
 </pre>
 
-The expression is wrapped inside of the equivalent of a go function:
-
-  func expr (lnum int64, rec *[]string, Id, Created_At, Updated_At, Email_Address, First_Name, Last_Name *string) bool {
-    return ...expression...
-  }
+The expression is evaluated using: https://github.com/kyleburton/go-eval, a restricted sub-set of the go language.  There will be a pre-defined variable for each field in the row as well all @__LINE__@ which contains the current record number.
 
 Head and Tail
 
 Header plus the first 100 records:
 
+<pre>
   abhead -i csv://foo.csv -n 100
+</pre>
 
 Header plus the last 100 records:
 
+<pre>
   abtail -i csv://foo.csv -n 100
+</pre>
 
 Header, skips the first 100 records, emits the rest:
 
+<pre>
   abtail -i csv://foo.csv -n +100
+</pre>
 
 Sorting
 
+<pre>
   absort -i csv://foo.csv -f Last_Name,First_Name
+</pre>
 
 Joining/Merging
 
@@ -106,7 +110,6 @@ h2. Common Command Line Options
 
 Specfiy an alternatvie temp directory to use.
 
-
 h2. URL Encoding
 
 h3. Schema
@@ -115,11 +118,7 @@ Schema correlates to the driver / file encoding.
 
 h3. Path
 
-Path correlates to the file path to read from or write to.  You can interaact
-with stdin/stdout on Unix by specifying file paths of /dev/stdin and
-/dev/stdout respectively.  Drivers may interpret these differently, ex:
-database drivers would interpret the first parts of the path as the database
-host, schema and table name.
+Path correlates to the file path to read from or write to.  You can interaact with stdin/stdout on Unix by specifying file paths of /dev/stdin and /dev/stdout respectively.  Drivers may interpret these differently, ex: database drivers would interpret the first parts of the path as the database host, schema and table name.
 
 h3. Query String
 
@@ -133,7 +132,7 @@ Specify the header for a file if it does not have one of its own.
 
 * -header
 
-Indicates the source has no header and that one should be fabricated (F1, F2, F3, ...).
+Indicates the source has no header and that one should be fabricated (F1, F2, F3, ...).  This is assumed if a header is supplied, and can be used to strip the header off of a destination file.
 
 * skipLines=N
 
@@ -147,48 +146,47 @@ h3. csv
 
 h3. fixed
 
-future
+TBD
 
 h3. xls
 
-future
+TBD
 
 h3. pg
 
-future
+TBD
 
 h3. mysql
 
-future
+TBD
 
 h1. Examples
 
 <pre>
-  go build && ./abtab -task cat -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count"
-  go build && ./abtab -task cat -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" -o csv:///dev/stdin
-  go build && ./abtab -task fill-rates -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count"
+  abcat -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count"
+  abcat -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" -o csv:///dev/stdin
+  abfillrates -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count"
 
-  go build && ./abtab -task grep -e 'Substr(Name,-1,0) == "y"' -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" 2>&1 | less
+  abgrep -e 'Substr(Name,-1,0) == "y"' -i "tab://fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" 2>&1 | less
 
 </pre>
 
 
 TODO:
 
-* implement an installer, and cmdline wrappers (abcat, abview, abgrep, ...)
-** make installation as simple as possible for the end-user, minimal pre-requisits
+* DONE implement an installer, and cmdline wrappers (abcat, abview, abgrep, ...)
 * documentation: packages, apis, examples, command line utilities
-* implement driver interface and types
+* DONE implement driver interface and types
 ** DONE driver type/struct
 ** DONE url parsing
-** driver options
+** DONE driver options
 * DONE implement tab driver
 * DONE implement csv driver
 * DONE implement abcat utility
 * implement support for memo fields in tab driver (embedded newlines and tabs, escape on input, unescape on output)
-* implement abcut utility
-* implement abhead utility
-* implement abtail utility
+* DONE implement abcut utility
+* DONE implement abhead utility
+* DONE implement abtail utility
 * DONE implement abview utility
 * DONE implement abgrep utility
 ** DONE fork https://github.com/sbinet/go-eval
@@ -196,10 +194,11 @@ TODO:
 *** DONE embed the go-eval interpreter into grep in order to evaluate expressions per record
 * DONE re-write grep's expression fn as a stream filter
 * extend the 'standard library' for abgrep's expression language
+** what does this need to be useful?
+* implement pg driver
 * implement absort utility
 * implement abmod driver
 * implement fixed driver
-* implement pg driver
 * implement mysql driver
 
 
