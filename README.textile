@@ -160,7 +160,9 @@ TBD
 
 h3. pg
 
-TBD
+NB: The pg driver supports read operations but does not support write operations.
+
+abcat -i "pg://localhost:5432/database_name/table_name?order=somecol&limit=10&offset=0&user=pg_username&password=pg_password" -o csv://table.csv
 
 h3. mysql
 

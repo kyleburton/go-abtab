@@ -25,6 +25,8 @@ var CmdlineOpts CmdlineOptsType = CmdlineOptsType {
   "output": "/dev/stdout",
 }
 
+var Verbose bool = false
+
 // Customized error type.
 type AbtabError struct {
   Message string

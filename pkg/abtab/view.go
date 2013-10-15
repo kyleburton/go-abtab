@@ -2,6 +2,8 @@ package abtab
 
 import (
   "fmt"
+  "os"
+  "math"
 )
 
 func init () {
@@ -28,11 +30,16 @@ func AbtabView (args []string) {
   }
 
   var recNum int64 = 0
+  colNumWidth := 1 + int(math.Log10(float64(len(inpUrl.Header))))
+  //fmt.Fprintf(os.Stderr, "colNumWidth: %d\n", colNumWidth)
   for rec := range inpUrl.Stream.Recs {
     recNum += 1
     fmt.Printf("Record[%d] # %s\n", recNum, inpUrl.OriginalUrl)
     for idx, value := range rec.Fields {
-      fmt.Printf("[% 2d] % *s : %s\n", 1+idx, -1*maxFieldWidth, inpUrl.Header[idx], value)
+      fmt.Printf("[% *s] % *s : %s\n", 
+      colNumWidth,
+      fmt.Sprintf("%d", 1+idx),
+      -1*maxFieldWidth, inpUrl.Header[idx], value)
     }
     fmt.Printf("\n")
   }

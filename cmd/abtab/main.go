@@ -31,6 +31,8 @@ func main () {
   flag.StringVar(&fields,      "fields",       "1",                 "cut: fields")
   flag.StringVar(&fields,      "f",            "1",                 "cut: fields")
 
+  flag.BoolVar(&abtab.Verbose, "v",            false,               "Be verbose (to stderr)")
+
   flag.Parse()
 
   var err error
