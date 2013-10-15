@@ -13,7 +13,6 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec) error {
   var file *os.File
   var err error
 
-  var numLines int64 = 0
 
   if fname == "/dev/stdin" || fname == "//dev/stdin" {
     file = os.Stdin
@@ -32,7 +31,7 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec) error {
     scanner.Scan()
   }
 
-
+  var numLines int64 = 0
   for scanner.Scan() {
     numLines = numLines + 1
     // turn \N into an empty string for any field where it appears
@@ -81,8 +80,7 @@ func (self *AbtabURL) CsvOpenRead () error {
     self.SetHeader(strings.Split(header[0], ","))
   } else {
     r := <-self.Stream.Recs
-    self.Header = r.Fields
-
+    self.SetHeader(r.Fields)
   }
 
   self.WriteRecord = func (r *Rec) error {

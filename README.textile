@@ -1,10 +1,27 @@
 h1. Abstract Table Utilities
 
-Tab is the core file format.  By default, files are expected to have a header line describing the columns in the file.
+Unix utilities that process 'abstracted tables', or streams of records.  In the spirit of of the classic Unix utilities: head, tail, cut, grep, sort, and works with multiple encodings (tab, csv, etc.).
+
+h1. Installation
+
+<pre>
+go get github.com/kyleburton/go-abtab/cmd/abtab
+cd $GOPATH/src/github.com/kyleburton/go-abtab
+bash install.sh
+</pre>
+
+h1. Overview
+
+Record streams are identified using a URI structure.  To convert a tab file in the pwd (@foo.tab@) to a csv file:
+
+<pre>
+abcat -i tab://foo.tab -o csv://foo.csv
+</pre>
+
+Tab separated values is the core file format.  By default, files are expected to have a header line describing the columns in the file though a header can be specified as part of the url.
 
 FieldSeparator='\t'
 RecordSeparator='\n'
-
 
 'Memo' fields, and embedded delimiters:
   Embedded Newlines represnted as '\n'
@@ -13,31 +30,43 @@ RecordSeparator='\n'
 
 Examples:
 
-'cat' a tab delimited file (no-op):
+'cat' a tab delimited file to the terminal:
 
+<pre>
   abcat -i foo.tab
+</pre>
 
 All utilities supoprt using a URL to specify the encoding:
 
+<pre>
   abcat -i tab://foo.tab
+</pre>
 
 Convert from CSV to TAB:
 
+<pre>
   abcat -i csv://foo.csv -o tab://foo.tab
+</pre>
 
 View a 'portrait' mode of the records in a file:
 
+<pre>
   abview -i csv://foo.csv
+</pre>
 
-Cut columns out of a file:
+Cut columns out of a file by name:
+
+<pre>
   # Id Created_At Updated_At Email_Address
   abcut -i csv://foo.csv -f Id,First_Name,Last_Name
-  abcut -i csv://foo.csv -n 1,5,6
+</pre>
 
 Grep for lines
 
+<pre>
   abgrep -i csv://foo.csv -e 'First_Name == "Bob"'
-  abgrep -i csv://foo.csv -e 'lnum >= 300 && lnum < 400'
+  abgrep -i csv://foo.csv -e '__LINE__ >= 300 && __LINE__ < 400'
+</pre>
 
 The expression is wrapped inside of the equivalent of a go function:
 

@@ -1,7 +1,8 @@
 package abtab
 
 import (
-  //"fmt"
+  "fmt"
+  "os"
   "strconv"
   "strings"
   "go/token"
@@ -95,9 +96,13 @@ func AbtabGrepMakeExpressionFilter (inp *AbtabURL, expr string) AbtabFilterFn {
   w := eval.NewWorld()
   InstallStandardLibrary(w)
 
-  var vars map[string]*eval.Variable = make(map[string]*eval.Variable)
+  var vars map[string]*eval.Variable = make(map[string]*eval.Variable,1)
 
   var empty = ""
+  var lnum int
+  v, _ := w.DefineVar("__LINE__", eval.TypeOfNative(lnum), eval.ToValue(lnum))
+  vars["__LINE__"] = v
+
   for _, fname := range inp.Header {
     v, _ := w.DefineVar(ScrubFieldNameForEval(fname), eval.TypeOfNative(empty), eval.ToValue(empty))
     vars[fname] = v
@@ -109,6 +114,9 @@ func AbtabGrepMakeExpressionFilter (inp *AbtabURL, expr string) AbtabFilterFn {
       var value = rec.Fields[idx]
       vars[fname].Init = eval.ToValue(value)
     }
+
+    //fmt.Fprintf(os.Stderr, "setting __LINE__=%d\n", rec.LineNum)
+    vars["__LINE__"].Init = eval.ToValue(int(rec.LineNum))
 
     // NB: this seems expensive, can we compile once?
     code, err := w.Compile(fset, expr)
@@ -145,6 +153,7 @@ func AbtabGrep (args []string) {
 
   var ii int64
   for ii = 0; ii < inpUrl.SkipLines; ii += 1 {
+    fmt.Fprintf(os.Stderr, "AbtabGrep: inpUrl.SkipLines=%d; Skipping line num: %d\n", inpUrl.SkipLines, ii)
     <-inpUrl.Stream.Recs
   }
 

@@ -15,7 +15,7 @@ func AbtabCut (args []string) {
   }
 
   fields := strings.Split(CmdlineOpts["fields"].(string), ",")
-  //fmt.Printf("AbtabCut: fields=%s\n", fields)
+  //fmt.Printf("AbtabCut: fields=%s; inpUrl.HeaderMap=%s\n", fields, inpUrl.HeaderMap)
 
   // cut the header
   newHeader := make([]string,0)
@@ -27,6 +27,7 @@ func AbtabCut (args []string) {
   }
   outUrl.Header = newHeader
   outUrl.OpenWrite()
+  //fmt.Printf("AbtabCut: newHeader=%s fieldIdxs=%s\n", newHeader, fieldIdxs)
 
   var ii int64
   for ii = 0; ii < inpUrl.SkipLines; ii += 1 {

@@ -8,11 +8,10 @@ import (
   "strconv"
 )
 
-func TabRecStream(source *AbtabURL, fname string, out chan *Rec) {
+func TabRecStream(source *AbtabURL, fname string, out chan *Rec, headerProvided bool) {
   var file *os.File
   var err error
 
-  var numLines int64 = 0
 
   if fname == "/dev/stdin" || fname == "//dev/stdin" {
     file = os.Stdin
@@ -25,6 +24,10 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec) {
     defer file.Close()
   }
 
+  var numLines int64 = 0
+  if !headerProvided {
+    numLines = -1
+  }
   scanner := bufio.NewScanner(file)
   for scanner.Scan() {
     numLines = numLines + 1
@@ -35,6 +38,7 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec) {
         fields[ii] = ""
       }
     }
+    //fmt.Fprintf(os.Stderr, "TabRecStream: Rec.LineNum=%s\n", numLines)
     out <- &Rec{
       Source:  source,
       LineNum: numLines,
@@ -73,12 +77,14 @@ func (self *AbtabURL) TabOpenRead () error {
     Recs:      make(chan *Rec),
     LastRecs:  make([]*Rec, 0),
   }
-  go TabRecStream(self, fileName, self.Stream.Recs)
 
   qs := self.Url.Query()
+  header, headerProvided := qs["header"]
 
-  header, ok := qs["header"]
-  if ok {
+  go TabRecStream(self, fileName, self.Stream.Recs, headerProvided)
+
+
+  if headerProvided {
     self.SetHeader(strings.Split(header[0], ","))
   } else {
     r, ok := <-self.Stream.Recs
