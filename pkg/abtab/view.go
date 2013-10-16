@@ -34,11 +34,12 @@ func AbtabView (args []string) {
   for rec := range inpUrl.Stream.Recs {
     recNum += 1
     fmt.Printf("Record[%d] # %s\n", recNum, inpUrl.OriginalUrl)
-    for idx, value := range rec.Fields {
+    for idx, fname := range inpUrl.Header {
+      value := rec.Fields[idx]
       fmt.Printf("[% *s] % *s : %s\n", 
       colNumWidth,
       fmt.Sprintf("%d", 1+idx),
-      -1*maxFieldWidth, inpUrl.Header[idx], value)
+      -1*maxFieldWidth, fname, value)
     }
     fmt.Printf("\n")
   }

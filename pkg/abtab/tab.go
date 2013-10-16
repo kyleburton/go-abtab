@@ -8,7 +8,7 @@ import (
   "strconv"
 )
 
-func TabRecStream(source *AbtabURL, fname string, out chan *Rec, headerProvided bool) {
+func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) {
   var file *os.File
   var err error
 
@@ -21,36 +21,66 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, headerProvided 
     if err != nil {
       panic(fmt.Sprintf("Error opening file: %s : %s", fname, err))
     }
-    defer file.Close()
   }
 
   var numLines int64 = 0
   if !headerProvided {
     numLines = -1
   }
+
   scanner := bufio.NewScanner(file)
-  for scanner.Scan() {
-    numLines = numLines + 1
-    // turn \N into an empty string for any field where it appears
+
+  if headerProvided {
+    source.SetHeader(strings.Split(header[0], ","))
+    //fmt.Fprintf(os.Stderr, "TabOpenRead: headerProvided=%s\n", source.Header)
+  } else {
+
+    if !scanner.Scan() {
+      // empty source
+      close(out)
+      return
+    }
+
     fields := strings.Split(scanner.Text(), "\t")
-    for ii, _ := range fields {
-      if fields[ii] == "\\N" {
-        fields[ii] = ""
+    source.SetHeader(fields)
+    //fmt.Fprintf(os.Stderr, "TabOpenRead: header read from 1st line='%s' header=%s\n", scanner.Text(), source.Header)
+  }
+
+
+  go func () {
+    defer file.Close()
+
+    for scanner.Scan() {
+      numLines = numLines + 1
+      fields := strings.Split(scanner.Text(), "\t")
+      // turn \N into an empty string for any field where it appears
+      numFields := len(source.Header)
+      if 0 == numFields {
+        numFields = len(fields)
+      }
+      recFields := make([]string, numFields)
+     //fmt.Fprintf(os.Stderr, "TabRecStream: Rec.LineNum=%s len(fields)=%d len(recFields)=%d len(source.Header)=%d\n", numLines,
+     //  len(fields), len(recFields), len(source.Header))
+      for ii, _ := range fields {
+        if fields[ii] == "\\N" {
+          fields[ii] = ""
+        }
+        recFields[ii] = fields[ii]
+      }
+      out <- &Rec{
+        Source:  source,
+        LineNum: numLines,
+        Fields:  recFields,
       }
     }
-    //fmt.Fprintf(os.Stderr, "TabRecStream: Rec.LineNum=%s\n", numLines)
-    out <- &Rec{
-      Source:  source,
-      LineNum: numLines,
-      Fields:  fields,
+
+    if err := scanner.Err(); err != nil {
+      panic(fmt.Sprintf("Error reading from file '%s' : %s", fname, err))
     }
-  }
 
-  if err := scanner.Err(); err != nil {
-    panic(fmt.Sprintf("Error reading from file %s : %s", fname, err))
-  }
+    close(out)
 
-  close(out)
+  }()
 }
 
 func TabFilePath (u *AbtabURL) string {
@@ -81,19 +111,7 @@ func (self *AbtabURL) TabOpenRead () error {
   qs := self.Url.Query()
   header, headerProvided := qs["header"]
 
-  go TabRecStream(self, fileName, self.Stream.Recs, headerProvided)
-
-
-  if headerProvided {
-    self.SetHeader(strings.Split(header[0], ","))
-  } else {
-    r, ok := <-self.Stream.Recs
-    if !ok {
-      // empty stream
-      return nil
-    }
-    self.Header = r.Fields
-  }
+  TabRecStream(self, fileName, self.Stream.Recs, header, headerProvided)
 
   skipLines, ok := qs["skipLines"]
   if ok {
