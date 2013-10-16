@@ -68,13 +68,27 @@ Grep for lines
   abgrep -i csv://foo.csv -e '__LINE__ >= 300 && __LINE__ < 400'
 </pre>
 
-Flip a coin for each line:
+Take a random sample: Flip a coin for each record:
 
 <pre>
   abgrep -e 'RandFloat()>0.5' -i tab://foo.tab
 </pre>
 
 The expression is evaluated using: https://github.com/kyleburton/go-eval, a restricted sub-set of the go language.  There will be a pre-defined variable for each field in the row as well all @__LINE__@ which contains the current record number.
+
+Take a sample: record 300 to 399:
+
+<pre>
+  abgrep -i csv://foo.csv -e '__LINE__ >= 300 && __LINE__ < 400'
+</pre>
+
+Take a sample: Emit every Nth record:
+
+<pre>
+  abgrep -e '(__LINE__%2)==0' -i tab://foo.tab
+  abgrep -e '(__LINE__%5)==0' -i tab://foo.tab
+  abgrep -e '(__LINE__%10)==0' -i tab://foo.tab
+</pre>
 
 Head and Tail
 
