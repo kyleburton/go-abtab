@@ -10,7 +10,7 @@ if [ ! -d "$GOPATH/bin" ]; then
   exit 1
 fi
 
-go get github.com/kyleburton/go-abtab/cmd/abtab
+go get -u github.com/kyleburton/go-abtab/cmd/abtab
 
 for b in cat cut grep head sort tail view; do
 
