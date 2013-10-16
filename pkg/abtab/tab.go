@@ -52,7 +52,7 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 
     for scanner.Scan() {
       numLines = numLines + 1
-      fields := strings.Split(scanner.Text(), "\t")
+      fields := strings.SplitN(scanner.Text(), "\t", len(source.Header))
       // turn \N into an empty string for any field where it appears
       numFields := len(source.Header)
       if 0 == numFields {
