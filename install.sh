@@ -1,3 +1,15 @@
+if [ -z "$GOPATH" ]; then
+  echo "Error: GOPATH is not set"
+  exit 1
+fi
+
+
+if [ ! -d "$GOPATH/bin" ]; then
+  echo "Error: \$GOPATH/bin does not exist, you can create it with:"
+  echo "  mkdir $GOPATH/bin"
+  exit 1
+fi
+
 go get github.com/kyleburton/go-abtab/cmd/abtab
 
 for b in cat cut grep head sort tail view; do

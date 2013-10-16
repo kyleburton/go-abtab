@@ -2,7 +2,6 @@ package abtab
 
 import (
   "fmt"
-  "os"
   "math"
 )
 
