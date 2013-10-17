@@ -73,6 +73,13 @@ func libRandFloat (th *eval.Thread, in []eval.Value, out []eval.Value) {
   out[0] = eval.ToValue(rand.Float64())
 }
 
+// Todo: determine how to create a slice type in go-eval
+//func libSplitString (th *eval.Thread, in []eval.Value, out []eval.Value) {
+//  s := in[0].String()
+//  p := in[1].String()
+//  out[0] = eval.ToValue(strings.Split(s, p))
+//}
+
 type LibEntry struct {
   Name   string
   Fn     func(*eval.Thread, []eval.Value, []eval.Value)
@@ -100,6 +107,10 @@ var StandardLibrary []LibEntry = []LibEntry {
    Type: eval.NewFuncType( []eval.Type { eval.StringType, eval.IntType, eval.IntType },
                                          false,
                                          []eval.Type { eval.StringType, })},
+//  {Name: "Split", Fn: libSplitString, 
+//   Type: eval.NewFuncType( []eval.Type { eval.StringType, eval.StringType, },
+//                                         false,
+//                                         []eval.Type { eval.NewSliceType(eval.StringType), })},
 }
 
 func InstallStandardLibrary (w *eval.World) {
