@@ -2,7 +2,8 @@ package abtab
 
 import (
 	"strings"
-	//"fmt"
+	"strconv"
+	"fmt"
 )
 
 func AbtabCut(args []string) {
@@ -14,20 +15,32 @@ func AbtabCut(args []string) {
 		panic(err)
 	}
 
-	fields := strings.Split(CmdlineOpts["fields"].(string), ",")
-	//fmt.Printf("AbtabCut: fields=%s; inpUrl.HeaderMap=%s\n", fields, inpUrl.HeaderMap)
+	fieldSpecs := strings.Split(CmdlineOpts["fields"].(string), ",")
+	if Verbose {
+		fmt.Printf("AbtabCut: fields=%s; inpUrl.HeaderMap=%s\n", fieldSpecs, inpUrl.HeaderMap)
+	}
 
 	// cut the header
 	newHeader := make([]string, 0)
 	fieldIdxs := make([]int, 0)
-	for _, fname := range fields {
-		fieldIdx := inpUrl.HeaderMap[fname]
+	var fieldIdx int
+	var ok bool
+	for _, fname := range fieldSpecs {
+		fieldIdx, ok = inpUrl.HeaderMap[fname]
+		if !ok {
+			fieldIdx, err = strconv.Atoi(fname)
+			if err != nil {
+				panic(fmt.Sprintf("Error[cut]: field='%s' is invalid (does not match a header, does not parse as an int): %s", fname, err))
+			}
+		}
 		newHeader = append(newHeader, inpUrl.Header[fieldIdx])
 		fieldIdxs = append(fieldIdxs, fieldIdx)
 	}
 	outUrl.Header = newHeader
 	outUrl.OpenWrite()
-	//fmt.Printf("AbtabCut: newHeader=%s fieldIdxs=%s\n", newHeader, fieldIdxs)
+	if Verbose {
+		fmt.Printf("AbtabCut: newHeader=%s fieldIdxs=%s\n", newHeader, fieldIdxs)
+	}
 
 	var ii int64
 	for ii = 0; ii < inpUrl.SkipLines; ii += 1 {
