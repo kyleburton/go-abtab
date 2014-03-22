@@ -4,6 +4,7 @@ import (
 	"strings"
 	"strconv"
 	"fmt"
+	"os"
 )
 
 func AbtabCut(args []string) {
@@ -17,7 +18,7 @@ func AbtabCut(args []string) {
 
 	fieldSpecs := strings.Split(CmdlineOpts["fields"].(string), ",")
 	if Verbose {
-		fmt.Printf("AbtabCut: fields=%s; inpUrl.HeaderMap=%s\n", fieldSpecs, inpUrl.HeaderMap)
+		fmt.Fprintf(os.Stderr, "AbtabCut: fields=%s; inpUrl.HeaderMap=%s\n", fieldSpecs, inpUrl.HeaderMap)
 	}
 
 	// cut the header
@@ -39,7 +40,7 @@ func AbtabCut(args []string) {
 	outUrl.Header = newHeader
 	outUrl.OpenWrite()
 	if Verbose {
-		fmt.Printf("AbtabCut: newHeader=%s fieldIdxs=%s\n", newHeader, fieldIdxs)
+		fmt.Fprintf(os.Stderr, "AbtabCut: newHeader=%s fieldIdxs=%s\n", newHeader, fieldIdxs)
 	}
 
 	var ii int64
