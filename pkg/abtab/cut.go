@@ -33,10 +33,19 @@ func AbtabCut(args []string) {
 			if err != nil {
 				panic(fmt.Sprintf("Error[cut]: field='%s' is invalid (does not match a header, does not parse as an int): %s", fname, err))
 			}
+			// field indexes for humans are 1's based, but
+			// 0's based
+			fieldIdx = fieldIdx - 1
 		}
+
+		// if Verbose {
+		// 	fmt.Fprintf(os.Stderr, "AbtabCut: fieldIdx:%d len(inpuUrl.Header)=%d\n", fieldIdx, len(inpUrl.Header[fieldIdx]))
+		// }
+
 		newHeader = append(newHeader, inpUrl.Header[fieldIdx])
 		fieldIdxs = append(fieldIdxs, fieldIdx)
 	}
+
 	outUrl.Header = newHeader
 	outUrl.OpenWrite()
 	if Verbose {
