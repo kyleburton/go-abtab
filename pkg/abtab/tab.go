@@ -31,7 +31,9 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 
 	if headerProvided {
 		source.SetHeader(strings.Split(header[0], ","))
-		//fmt.Fprintf(os.Stderr, "TabOpenRead: headerProvided=%s\n", source.Header)
+		if Verbose {
+			fmt.Fprintf(os.Stderr, "TabOpenRead: headerProvided=%s\n", source.Header)
+		}
 	} else {
 
 		if !scanner.Scan() {
@@ -42,7 +44,9 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 
 		fields := strings.Split(scanner.Text(), "\t")
 		source.SetHeader(fields)
-		//fmt.Fprintf(os.Stderr, "TabOpenRead: header read from 1st line='%s' header=%s\n", scanner.Text(), source.Header)
+		if Verbose {
+			fmt.Fprintf(os.Stderr, "TabOpenRead: header read from 1st line='%s' header=%s\n", scanner.Text(), source.Header)
+		}
 	}
 
 	go func() {
@@ -50,16 +54,15 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 
 		for scanner.Scan() {
 			numLines = numLines + 1
-			fields := strings.SplitN(scanner.Text(), "\t", len(source.Header))
-			// turn \N into an empty string for any field where it appears
+			fields := strings.Split(scanner.Text(), "\t")
 			numFields := len(source.Header)
-			if 0 == numFields {
+			if len(fields) > numFields {
 				numFields = len(fields)
 			}
 			recFields := make([]string, numFields)
-			//fmt.Fprintf(os.Stderr, "TabRecStream: Rec.LineNum=%s len(fields)=%d len(recFields)=%d len(source.Header)=%d\n", numLines,
-			//  len(fields), len(recFields), len(source.Header))
 			for ii, _ := range fields {
+				// turn \N into an empty string for any field where it appears
+				// NB: this is a data translation that should be documented!
 				if fields[ii] == "\\N" {
 					fields[ii] = ""
 				}

@@ -30,12 +30,17 @@ func AbtabView(args []string) {
 
 	var recNum int64 = 0
 	colNumWidth := 1 + int(math.Log10(float64(len(inpUrl.Header))))
-	//fmt.Fprintf(os.Stderr, "colNumWidth: %d\n", colNumWidth)
 	for rec := range inpUrl.Stream.Recs {
 		recNum += 1
 		fmt.Printf("Record[%d] # %s\n", recNum, inpUrl.OriginalUrl)
-		for idx, fname := range inpUrl.Header {
-			value := rec.Fields[idx]
+		for idx, value := range rec.Fields {
+			// value := rec.Fields[idx]
+			var fname string
+			if idx < len(inpUrl.Header) {
+				fname = inpUrl.Header[idx]
+			} else {
+				fname = ""
+			}
 			fmt.Printf("[% *s] % *s : %s\n",
 				colNumWidth,
 				fmt.Sprintf("%d", 1+idx),

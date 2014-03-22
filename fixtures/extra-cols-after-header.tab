@@ -1,0 +1,4 @@
+id	first-name	last-name
+1	John	McCarthy	language	Lisp	specialties	Artificial Intelligence
+2	Alonzo	Church	language Lambda Calculus	specialties Mathematics of combinators
+4	Alan	Turing	born	1912	died	1954	specialties	Turing Machine, Algorithms, Cryptology, Computer Architecture
