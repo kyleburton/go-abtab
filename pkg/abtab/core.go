@@ -73,7 +73,7 @@ func (self *AbtabURL) SetHeader(header []string) {
 
 // To string helper for debugging.
 func (self *AbtabURL) String() string {
-	return fmt.Sprintf("AbtabUrl{OriginalUrl=%s; Scheme=%s; Host=%s; User=%s; Path=%s; Query=%s}",
+	return fmt.Sprintf("AbtabURL{OriginalUrl=%s; Scheme=%s; Host=%s; User=%s; Path=%s; Query=%s}",
 		self.OriginalUrl,
 		self.Url.Scheme,
 		self.Url.Host,
@@ -99,12 +99,16 @@ func ParseURL(u string) (*AbtabURL, error) {
 // Open a source for reading.
 func (self *AbtabURL) OpenRead() error {
 	switch {
+	case "" == self.Url.Scheme:
+		self.TabOpenRead()
+		return nil
+		break
 	case "tab" == self.Url.Scheme:
 		self.TabOpenRead()
 		return nil
 		break
-	case "" == self.Url.Scheme:
-		self.TabOpenRead()
+	case "fixed" == self.Url.Scheme:
+		self.FixedWidthOpenRead()
 		return nil
 		break
 	default:
@@ -130,12 +134,16 @@ func (self *AbtabURL) OpenRead() error {
 // Open a source for writing.
 func (self *AbtabURL) OpenWrite() error {
 	switch {
+	case "" == self.Url.Scheme:
+		self.TabOpenWrite()
+		return nil
+		break
 	case "tab" == self.Url.Scheme:
 		self.TabOpenWrite()
 		return nil
 		break
-	case "" == self.Url.Scheme:
-		self.TabOpenWrite()
+	case "fixed" == self.Url.Scheme:
+		self.FixedWidthOpenWrite()
 		return nil
 		break
 	default:
