@@ -20,11 +20,16 @@ for b in cat cut grep head sort tail view; do
 set -eu
 ROOT="\$(dirname \$( cd "\$( dirname "${BASH_SOURCE[0]}" )" && pwd ))"
 
-"$GOPATH/bin/abtab" -task $b "\$@"
+if [ -t 1 ]; then
+  "$GOPATH/bin/abtab" -task $b "\$@" | less
+else
+  "$GOPATH/bin/abtab" -task $b "\$@"
+fi
 HERE
 
   chmod 755 $GOPATH/bin/ab$b
 done
+
 
 cat >$GOPATH/bin/abfillrates <<HERE
 #!/usr/bin/env bash
