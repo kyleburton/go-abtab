@@ -32,7 +32,7 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 	if headerProvided {
 		source.SetHeader(strings.Split(header[0], ","))
 		if Verbose {
-			fmt.Fprintf(os.Stderr, "TabOpenRead: headerProvided=%s\n", source.Header)
+			fmt.Fprintf(os.Stderr, "TabRecStream: headerProvided=%s\n", source.Header)
 		}
 	} else {
 
@@ -42,10 +42,10 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 			return
 		}
 
-		fields := strings.Split(scanner.Text(), "\t")
+		fields := strings.Split(scanner.Text(), source.FieldSeparator)
 		source.SetHeader(fields)
 		if Verbose {
-			fmt.Fprintf(os.Stderr, "TabOpenRead: header read from 1st line='%s' header=%s\n", scanner.Text(), source.Header)
+			fmt.Fprintf(os.Stderr, "TabRecStream: header read from 1st line='%s' header=%s\n", scanner.Text(), source.Header)
 		}
 	}
 
@@ -54,7 +54,7 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 
 		for scanner.Scan() {
 			numLines = numLines + 1
-			fields := strings.Split(scanner.Text(), "\t")
+			fields := strings.Split(scanner.Text(), source.FieldSeparator)
 			numFields := len(source.Header)
 			if len(fields) > numFields {
 				numFields = len(fields)
@@ -112,6 +112,19 @@ func (self *AbtabURL) TabOpenRead() error {
 	qs := self.Url.Query()
 	header, headerProvided := qs["header"]
 
+	self.FieldSeparator = "\t"
+	self.RecordSeparator = "\n"
+
+	delim, delimProvided := qs["delim"]
+	if delimProvided {
+		self.FieldSeparator = delim[0]
+	}
+
+	recSep, recSepProvided := qs["rsep"]
+	if recSepProvided {
+		self.RecordSeparator = recSep[0]
+	}
+
 	TabRecStream(self, fileName, self.Stream.Recs, header, headerProvided)
 
 	skipLines, ok := qs["skipLines"]
@@ -128,9 +141,7 @@ func (self *AbtabURL) TabOpenRead() error {
 	self.Close = func() error {
 		return nil
 	}
-	// NB: pull these optionally from the QueryString
-	self.FieldSeparator = "\t"
-	self.RecordSeparator = "\n"
+
 	return nil
 }
 
@@ -154,12 +165,23 @@ func (self *AbtabURL) TabOpenWrite() error {
 	}
 
 	qs := self.Url.Query()
-	_, noHeader := qs["-header"]
 
-	// NB: pull these optionally from the QueryString
 	self.FieldSeparator = "\t"
 	self.RecordSeparator = "\n"
 
+	delim, delimProvided := qs["delim"]
+	if delimProvided {
+		self.FieldSeparator = delim[0]
+	}
+
+	//fmt.Printf("TabOpenWrite: FieldSeparator=%s\n", self.FieldSeparator)
+
+	recSep, recSepProvided := qs["rsep"]
+	if recSepProvided {
+		self.RecordSeparator = recSep[0]
+	}
+
+	_, noHeader := qs["-header"]
 	if !noHeader {
 		_, err = file.Write([]byte(strings.Join(self.Header, self.FieldSeparator)))
 		if err != nil {
