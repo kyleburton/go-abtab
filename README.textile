@@ -158,15 +158,19 @@ Indicates the source has no header and that one should be fabricated (F1, F2, F3
 
 Indicates to skip the first N lines of the source.
 
-h2. Supported Drivers
+h2. Supported Encoding Formats
 
 h3. tab
 
+There are no custom options supported for the tab driver.
+
 h3. csv
+
+There are no custom options supported for the csv driver.
 
 h3. fixed
 
-TBD
+The fixed width driver can be used to read or write fixed width file formats.  It supports the following options:
 
 h3. xls
 
