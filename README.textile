@@ -228,4 +228,16 @@ TODO:
 * implement fixed driver
 * implement mysql driver
 
+### Fill Rates:
+
+#### Implement a cardinality checker.  
+
+Support both a strict uniqueness count (requires keeping the entire file in
+ram), and estimation of cardinatlity (using a bloom filter or hyper-log-log)
+
+* https://github.com/dataence/bloom
+* https://github.com/willf/bloom
+* (HLL) https://gist.github.com/jdp/6095563
+* http://research.neustar.biz/2012/10/25/sketch-of-the-day-hyperloglog-cornerstone-of-a-big-data-infrastructure/
+
 
