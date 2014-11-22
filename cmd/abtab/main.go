@@ -5,86 +5,172 @@ import (
 	"fmt"
 	"github.com/kyleburton/go-abtab/pkg/abtab"
 	"os"
+	"strings"
+	"path"
 )
 
+type CommandLineOptionsStruct struct {
+  Task           string
+  Input          string
+  Output         string
+  Expression     string
+  SortKey        string
+  Tmpdir         string
+  SortViaNumeric string
+  SortReverse    string
+  Fields         string
+  Args           []string
+}
+
+var DefaultInput = "tab:///dev/stdin"
+var DefaultOutput = "tab:///dev/stdout"
+
+var CommandLineOptions CommandLineOptionsStruct = CommandLineOptionsStruct{
+}
+
+func LooksLikeUri (s string) bool {
+  return strings.Contains(CommandLineOptions.Input, "://")
+}
+
+func FileNameToUri (fname string) string {
+  if LooksLikeUri(fname) {
+    return fname
+  }
+
+  ext := strings.ToLower(path.Ext(fname))
+  if len(ext) > 0 {
+    ext = ext[1:]
+  }
+  // fmt.Fprintf(os.Stderr, "FileNameToUri[%s] ext=%s\n", fname, ext)
+  switch {
+  case "tab" == ext:
+    return strings.Join([]string{"tab://", fname}, "")
+    break
+  case "csv" == ext:
+    return strings.Join([]string{"csv://", fname}, "")
+    break
+  default:
+    return fname
+  }
+
+  return fname
+}
+
+func FindInputUri () {
+  if CommandLineOptions.Input != DefaultInput && LooksLikeUri(CommandLineOptions.Input) {
+    return
+  }
+
+  if CommandLineOptions.Input != DefaultInput {
+    CommandLineOptions.Input = FileNameToUri(CommandLineOptions.Input)
+    return
+  }
+
+  if CommandLineOptions.Input == DefaultInput && len(CommandLineOptions.Args) > 0 {
+    CommandLineOptions.Input = FileNameToUri(CommandLineOptions.Args[0])
+    CommandLineOptions.Args  = CommandLineOptions.Args[1:]
+  }
+
+}
+
+func FindOutputUri () {
+  if CommandLineOptions.Output != DefaultOutput && LooksLikeUri(CommandLineOptions.Output) {
+    return
+  }
+
+  if CommandLineOptions.Output != DefaultOutput {
+    CommandLineOptions.Output = FileNameToUri(CommandLineOptions.Output)
+    return
+  }
+
+  if CommandLineOptions.Output == DefaultOutput && len(CommandLineOptions.Args) > 0 {
+    CommandLineOptions.Output = FileNameToUri(CommandLineOptions.Args[0])
+    CommandLineOptions.Args  = CommandLineOptions.Args[1:]
+  }
+
+}
+
 func main() {
-	var task, input, output, expression, sortKey, tmpdir, sortNumeric, sortReverse, fields string
-	flag.StringVar(&task, "task", "cat", "Task (App) to run.")
-	flag.StringVar(&input, "input", "tab:///dev/stdin", "Input Source")
-	flag.StringVar(&input, "i", "tab:///dev/stdin", "Input Source")
-	flag.StringVar(&output, "output", "tab:///dev/stdout", "Output Destination")
-	flag.StringVar(&output, "o", "tab:///dev/stdout", "Output Destination")
-	flag.StringVar(&expression, "expression", "true", "Specify Expression")
-	flag.StringVar(&expression, "e", "true", "Specify Expression")
+	flag.StringVar(&CommandLineOptions.Task, "task", "cat", "Task (App) to run.")
+	flag.StringVar(&CommandLineOptions.Input, "input", DefaultInput, "Input Source")
+	flag.StringVar(&CommandLineOptions.Input, "i", DefaultInput, "Input Source")
+	flag.StringVar(&CommandLineOptions.Output, "output", DefaultOutput, "Output Destination")
+	flag.StringVar(&CommandLineOptions.Output, "o", DefaultOutput, "Output Destination")
+	flag.StringVar(&CommandLineOptions.Expression, "expression", "true", "Specify Expression")
+	flag.StringVar(&CommandLineOptions.Expression, "e", "true", "Specify Expression")
 
-	flag.StringVar(&sortKey, "key", "", "Sort Key Fields, comma separated")
-	flag.StringVar(&sortKey, "k", "", "Sort Key Fields, comma separated")
-	flag.StringVar(&sortNumeric, "numeric-sort", "false", "Sort according to numerical value.")
-	flag.StringVar(&sortNumeric, "n", "false", "head,tail: number of lines; sort: Sort according to numerical value.")
-	flag.StringVar(&sortReverse, "reverse", "false", "Reverse sort order")
-	flag.StringVar(&sortReverse, "r", "false", "Reverse sort order")
+	flag.StringVar(&CommandLineOptions.SortKey, "key", "", "Sort Key Fields, comma separated")
+	flag.StringVar(&CommandLineOptions.SortKey, "k", "", "Sort Key Fields, comma separated")
+	flag.StringVar(&CommandLineOptions.SortViaNumeric, "numeric-sort", "false", "Sort according to numerical value.")
+	flag.StringVar(&CommandLineOptions.SortViaNumeric, "n", "false", "head,tail: number of lines; sort: Sort according to numerical value.")
+	flag.StringVar(&CommandLineOptions.SortReverse, "reverse", "false", "Reverse sort order")
+	flag.StringVar(&CommandLineOptions.SortReverse, "r", "false", "Reverse sort order")
 
-	// re-use of '-n'
-	flag.StringVar(&sortNumeric, "numLines", "10", "Number of lines (head, tail).")
+	// re-use of '-&n'
+	flag.StringVar(&CommandLineOptions.SortViaNumeric, "numLines", "10", "Number of lines (head, tail).")
 
-	flag.StringVar(&tmpdir, "tmpdir", "/tmp", "Directory to use for temporary files.")
-	flag.StringVar(&fields, "fields", "1", "cut: fields")
-	flag.StringVar(&fields, "f", "1", "cut: fields")
+	flag.StringVar(&CommandLineOptions.Tmpdir, "tmpdir", "/tmp", "Directory to use for temporary files.")
+	flag.StringVar(&CommandLineOptions.Fields, "fields", "1", "cut: fields")
+	flag.StringVar(&CommandLineOptions.Fields, "f", "1", "cut: fields")
 
 	flag.BoolVar(&abtab.Verbose, "v", false, "Be verbose (to stderr)")
 
 	flag.Parse()
+  CommandLineOptions.Args = flag.Args()
+
+  FindInputUri()
+  FindOutputUri()
 
 	var err error
-	abtab.CmdlineOpts["input"], err = abtab.ParseURL(input)
+	abtab.CmdlineOpts["input"], err = abtab.ParseURL(CommandLineOptions.Input)
 	if err != nil {
 		panic(err)
 	}
 
-	abtab.CmdlineOpts["output"], err = abtab.ParseURL(output)
+	abtab.CmdlineOpts["output"], err = abtab.ParseURL(CommandLineOptions.Output)
 	if err != nil {
 		panic(err)
 	}
 
-	abtab.CmdlineOpts["expression"] = expression
-	abtab.CmdlineOpts["sortKey"] = sortKey
-	abtab.CmdlineOpts["sortNumeric"] = sortNumeric
-	abtab.CmdlineOpts["numLines"] = sortNumeric // re-use of -n
-	abtab.CmdlineOpts["sortReverse"] = sortReverse
-	abtab.CmdlineOpts["tmpdir"] = tmpdir
-	abtab.CmdlineOpts["fields"] = fields
+	abtab.CmdlineOpts["expression"]  = CommandLineOptions.Expression
+	abtab.CmdlineOpts["sortKey"]     = CommandLineOptions.SortKey
+	abtab.CmdlineOpts["sortNumeric"] = CommandLineOptions.SortViaNumeric
+	abtab.CmdlineOpts["numLines"]    = CommandLineOptions.SortViaNumeric // re-use of -n
+	abtab.CmdlineOpts["sortReverse"] = CommandLineOptions.SortReverse
+	abtab.CmdlineOpts["tmpdir"]      = CommandLineOptions.Tmpdir
+	abtab.CmdlineOpts["fields"]      = CommandLineOptions.Fields
 
 	if abtab.Verbose {
 		fmt.Fprintf(os.Stderr, "CmdlineOpts: %s\n", abtab.CmdlineOpts)
 	}
 
 	switch {
-	case "cat" == task:
-		abtab.AbtabCat(flag.Args())
+	case "cat" == CommandLineOptions.Task:
+		abtab.AbtabCat(CommandLineOptions.Args)
 		break
-	case "view" == task:
-		abtab.AbtabView(flag.Args())
+	case "view" == CommandLineOptions.Task:
+		abtab.AbtabView(CommandLineOptions.Args)
 		break
-	case "fillrates" == task || "fill-rates" == task:
-		abtab.AbtabFillRates(flag.Args())
+	case "fillrates" == CommandLineOptions.Task || "fill-rates" == CommandLineOptions.Task:
+		abtab.AbtabFillRates(CommandLineOptions.Args)
 		break
-	case "grep" == task:
-		abtab.AbtabGrep(flag.Args())
+	case "grep" == CommandLineOptions.Task:
+		abtab.AbtabGrep(CommandLineOptions.Args)
 		break
-	case "sort" == task:
-		abtab.AbtabSort(flag.Args())
+	case "sort" == CommandLineOptions.Task:
+		abtab.AbtabSort(CommandLineOptions.Args)
 		break
-	case "head" == task:
-		abtab.AbtabHead(flag.Args())
+	case "head" == CommandLineOptions.Task:
+		abtab.AbtabHead(CommandLineOptions.Args)
 		break
-	case "tail" == task:
-		abtab.AbtabTail(flag.Args())
+	case "tail" == CommandLineOptions.Task:
+		abtab.AbtabTail(CommandLineOptions.Args)
 		break
-	case "cut" == task:
-		abtab.AbtabCut(flag.Args())
+	case "cut" == CommandLineOptions.Task:
+		abtab.AbtabCut(CommandLineOptions.Args)
 		break
 	default:
-		fmt.Fprintf(os.Stderr, "Error: unrecognized task: %s\n", task)
+		fmt.Fprintf(os.Stderr, "Error: unrecognized task: %s\n", CommandLineOptions.Task)
 		os.Exit(1)
 	}
 
