@@ -65,7 +65,7 @@ func main() {
 	case "view" == task:
 		abtab.AbtabView(flag.Args())
 		break
-	case "fill-rates" == task:
+	case "fillrates" == task || "fill-rates" == task:
 		abtab.AbtabFillRates(flag.Args())
 		break
 	case "grep" == task:

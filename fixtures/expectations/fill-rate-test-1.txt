@@ -1,4 +1,4 @@
-Fill Rates file: fixtures/fill-rate-test-1.input.tab, Records: 10
+Fill Rates file: ../fixtures/fill-rate-test-1.input.tab, Records: 10
 [ 1] place         :  9  90.00%
 [ 2] rn            :  7  70.00%
 [ 3] year of birth : 10 100.00%
