@@ -1,7 +1,8 @@
 package abtab
 
 import (
-	"bufio"
+	// "bufio"
+  "io"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -10,48 +11,48 @@ import (
 )
 
 func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) error {
-	var file *os.File
 	var err error
+  //fmt.Fprintf(os.Stderr, "CsvRecStream: fname=%s\n", fname)
 
-	if fname == "/dev/stdin" || fname == "//dev/stdin" {
-		file = os.Stdin
-	} else {
-		if file, err = os.Open(fname); err != nil {
-			panic(fmt.Sprintf("Error opening file: %s : %s", fname, err))
-		}
-	}
+	csvFile, err := os.Open(fname)
 
-	scanner := bufio.NewScanner(file)
+  if err != nil {
+    panic(err)
+  }
+
+  reader := csv.NewReader(csvFile)
+
+  reader.FieldsPerRecord = -1;
 
 	var idx int64
-	//fmt.Printf("CsvRecStream: skipping: %d lines\n", source.SkipLines)
+	//fmt.Printf("CsvRecStream: skipping: %d records\n", source.SkipLines)
 	for idx = 0; idx < source.SkipLines; idx += 1 {
-		scanner.Scan()
+		reader.Read()
 	}
 
 	if headerProvided {
 		source.SetHeader(strings.Split(header[0], ","))
 	} else {
-		if !scanner.Scan() {
-			// empty stream
-			close(out)
-			return nil
-		}
+    fields, err := reader.Read()
 
-		fields, err := csv.NewReader(strings.NewReader(scanner.Text())).Read()
 		if err != nil {
 			panic(err)
 		}
 		source.SetHeader(fields)
 	}
 
+  //fmt.Fprintf(os.Stderr, "CsvRecStream: header=%s\n", source.Header)
+
 	go func() {
-		defer file.Close()
+		defer csvFile.Close()
 		var numLines int64 = 0
-		for scanner.Scan() {
+    for ;; {
+      fields, err := reader.Read()
+      if err == io.EOF {
+        break;
+      }
 			numLines = numLines + 1
-			// turn \N into an empty string for any field where it appears
-			fields, err := csv.NewReader(strings.NewReader(scanner.Text())).Read()
+      // todo: turn \N into an empty string for any field where it appears
 			if err != nil {
 				panic(err)
 			}
@@ -65,10 +66,6 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 				LineNum: numLines,
 				Fields:  fields,
 			}
-		}
-
-		if err := scanner.Err(); err != nil {
-			panic(fmt.Sprintf("Error reading from file %s : %s", fname, err))
 		}
 
 		close(out)

@@ -99,6 +99,11 @@ cat ../fixtures/expectations/stratsol.tab | ../abtab -task cat -o "tab://../fixt
 assert_files_identical ../fixtures/test-output/stratsol.tab ../fixtures/expectations/stratsol.tab
 echo_lgreen "OK"
 
+echo_lblue -n "  handles multi-line fields "
+../abtab -task cat -i "csv://../fixtures/expectations/multi-line-fields.csv" -o "csv://../fixtures/test-output/multi-line-fields.csv"
+assert_files_identical ../fixtures/test-output/multi-line-fields.csv ../fixtures/expectations/multi-line-fields.csv
+echo_lgreen "OK"
+
 ########################################
 echo ""
 echo_lmagenta "abhead"
