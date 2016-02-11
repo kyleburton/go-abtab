@@ -84,13 +84,15 @@ clean_all
 echo ""
 echo_lmagenta "abcat"
 
+test -d ../fixtures/test-output || mkdir ../fixtures/test-output
+
 echo_lblue -n "  can specify header "
-../abtab -task cat -i "tab://../fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" -o "tab://../fixtures/test-output/header.tab"
+../abtab -task cat -i "csv://../fixtures/galbithink.org/92f10-19.txt?skipLines=4&header=Name,Count" -o "tab://../fixtures/test-output/header.tab"
 assert_files_identical ../fixtures/test-output/header.tab ../fixtures/expectations/92f10-19.tab
 echo_lgreen "OK"
 
 echo_lblue -n "  can skip leading lines "
-../abtab -task cat -i "tab://../fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" -o "tab://../fixtures/test-output/skip.tab"
+../abtab -task cat -i "csv://../fixtures/galbithink.org/92f10-19.txt?skipLines=4&header=Name,Count" -o "tab://../fixtures/test-output/skip.tab"
 assert_files_identical ../fixtures/test-output/skip.tab ../fixtures/expectations/92f10-19.tab
 echo_lgreen "OK"
 
@@ -161,7 +163,7 @@ echo ""
 echo_lmagenta "abcut"
 
 echo_lblue -n "  can re-order columns "
-../abtab -task cut -f Count,Name -i "tab://../fixtures/galbithink.org/92f10-19.tab?skipLines=4&header=Name,Count" -o "tab://../fixtures/test-output/92f10-19.cut-count-name.tab"
+../abtab -task cut -f Count,Name -i "csv://../fixtures/galbithink.org/92f10-19.txt?skipLines=4&header=Name,Count" -o "tab://../fixtures/test-output/92f10-19.cut-count-name.tab"
 assert_files_identical ../fixtures/test-output/92f10-19.cut-count-name.tab ../fixtures/expectations/92f10-19.cut-count-name.tab
 echo_lgreen "OK"
 
