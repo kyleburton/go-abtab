@@ -18,8 +18,8 @@ for b in cat cut grep head sort tail view; do
 #!/usr/bin/env bash
 
 set -eu
-ROOT="\$(dirname \$( cd "\$( dirname "${BASH_SOURCE[0]}" )" && pwd ))"
 
+# if stdout is a termianl, then we automatically pipe through less
 if [ -t 1 ]; then
   "$GOPATH/bin/abtab" -task $b "\$@" | less
 else
