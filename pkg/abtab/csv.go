@@ -2,9 +2,9 @@ package abtab
 
 import (
 	// "bufio"
-  "io"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -12,17 +12,17 @@ import (
 
 func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) error {
 	var err error
-  //fmt.Fprintf(os.Stderr, "CsvRecStream: fname=%s\n", fname)
+	//fmt.Fprintf(os.Stderr, "CsvRecStream: fname=%s\n", fname)
 
 	csvFile, err := os.Open(fname)
 
-  if err != nil {
-    panic(err)
-  }
+	if err != nil {
+		panic(err)
+	}
 
-  reader := csv.NewReader(csvFile)
+	reader := csv.NewReader(csvFile)
 
-  reader.FieldsPerRecord = -1;
+	reader.FieldsPerRecord = -1
 
 	var idx int64
 	//fmt.Printf("CsvRecStream: skipping: %d records\n", source.SkipLines)
@@ -33,7 +33,7 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 	if headerProvided {
 		source.SetHeader(strings.Split(header[0], ","))
 	} else {
-    fields, err := reader.Read()
+		fields, err := reader.Read()
 
 		if err != nil {
 			panic(err)
@@ -41,18 +41,18 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 		source.SetHeader(fields)
 	}
 
-  //fmt.Fprintf(os.Stderr, "CsvRecStream: header=%s\n", source.Header)
+	//fmt.Fprintf(os.Stderr, "CsvRecStream: header=%s\n", source.Header)
 
 	go func() {
 		defer csvFile.Close()
 		var numLines int64 = 0
-    for ;; {
-      fields, err := reader.Read()
-      if err == io.EOF {
-        break;
-      }
+		for {
+			fields, err := reader.Read()
+			if err == io.EOF {
+				break
+			}
 			numLines = numLines + 1
-      // todo: turn \N into an empty string for any field where it appears
+			// todo: turn \N into an empty string for any field where it appears
 			if err != nil {
 				panic(err)
 			}

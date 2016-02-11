@@ -5,88 +5,87 @@ import (
 	"fmt"
 	"github.com/kyleburton/go-abtab/pkg/abtab"
 	"os"
-	"strings"
 	"path"
+	"strings"
 )
 
 type CommandLineOptionsStruct struct {
-  Task           string
-  Input          string
-  Output         string
-  Expression     string
-  SortKey        string
-  Tmpdir         string
-  SortViaNumeric string
-  SortReverse    string
-  Fields         string
-  Args           []string
+	Task           string
+	Input          string
+	Output         string
+	Expression     string
+	SortKey        string
+	Tmpdir         string
+	SortViaNumeric string
+	SortReverse    string
+	Fields         string
+	Args           []string
 }
 
 var DefaultInput = "tab:///dev/stdin"
 var DefaultOutput = "tab:///dev/stdout"
 
-var CommandLineOptions CommandLineOptionsStruct = CommandLineOptionsStruct{
+var CommandLineOptions CommandLineOptionsStruct = CommandLineOptionsStruct{}
+
+func LooksLikeUri(s string) bool {
+	return strings.Contains(CommandLineOptions.Input, "://")
 }
 
-func LooksLikeUri (s string) bool {
-  return strings.Contains(CommandLineOptions.Input, "://")
+func FileNameToUri(fname string) string {
+	if LooksLikeUri(fname) {
+		return fname
+	}
+
+	ext := strings.ToLower(path.Ext(fname))
+	if len(ext) > 0 {
+		ext = ext[1:]
+	}
+	// fmt.Fprintf(os.Stderr, "FileNameToUri[%s] ext=%s\n", fname, ext)
+	switch {
+	case "tab" == ext:
+		return strings.Join([]string{"tab://", fname}, "")
+		break
+	case "csv" == ext:
+		return strings.Join([]string{"csv://", fname}, "")
+		break
+	default:
+		return fname
+	}
+
+	return fname
 }
 
-func FileNameToUri (fname string) string {
-  if LooksLikeUri(fname) {
-    return fname
-  }
+func FindInputUri() {
+	if CommandLineOptions.Input != DefaultInput && LooksLikeUri(CommandLineOptions.Input) {
+		return
+	}
 
-  ext := strings.ToLower(path.Ext(fname))
-  if len(ext) > 0 {
-    ext = ext[1:]
-  }
-  // fmt.Fprintf(os.Stderr, "FileNameToUri[%s] ext=%s\n", fname, ext)
-  switch {
-  case "tab" == ext:
-    return strings.Join([]string{"tab://", fname}, "")
-    break
-  case "csv" == ext:
-    return strings.Join([]string{"csv://", fname}, "")
-    break
-  default:
-    return fname
-  }
+	if CommandLineOptions.Input != DefaultInput {
+		CommandLineOptions.Input = FileNameToUri(CommandLineOptions.Input)
+		return
+	}
 
-  return fname
-}
-
-func FindInputUri () {
-  if CommandLineOptions.Input != DefaultInput && LooksLikeUri(CommandLineOptions.Input) {
-    return
-  }
-
-  if CommandLineOptions.Input != DefaultInput {
-    CommandLineOptions.Input = FileNameToUri(CommandLineOptions.Input)
-    return
-  }
-
-  if CommandLineOptions.Input == DefaultInput && len(CommandLineOptions.Args) > 0 {
-    CommandLineOptions.Input = FileNameToUri(CommandLineOptions.Args[0])
-    CommandLineOptions.Args  = CommandLineOptions.Args[1:]
-  }
+	if CommandLineOptions.Input == DefaultInput && len(CommandLineOptions.Args) > 0 {
+		CommandLineOptions.Input = FileNameToUri(CommandLineOptions.Args[0])
+		CommandLineOptions.Args = CommandLineOptions.Args[1:]
+	}
 
 }
 
-func FindOutputUri () {
-  if CommandLineOptions.Output != DefaultOutput && LooksLikeUri(CommandLineOptions.Output) {
-    return
-  }
+func FindOutputUri() {
+	if CommandLineOptions.Output != DefaultOutput && LooksLikeUri(CommandLineOptions.Output) {
+		return
+	}
 
-  if CommandLineOptions.Output != DefaultOutput {
-    CommandLineOptions.Output = FileNameToUri(CommandLineOptions.Output)
-    return
-  }
+	if CommandLineOptions.Output != DefaultOutput {
+		CommandLineOptions.Output = FileNameToUri(CommandLineOptions.Output)
+		return
+	}
 
-  if CommandLineOptions.Output == DefaultOutput && len(CommandLineOptions.Args) > 0 {
-    CommandLineOptions.Output = FileNameToUri(CommandLineOptions.Args[0])
-    CommandLineOptions.Args  = CommandLineOptions.Args[1:]
-  }
+	if CommandLineOptions.Output == DefaultOutput && len(CommandLineOptions.Args) > 0 {
+		CommandLineOptions.Output = FileNameToUri(CommandLineOptions.Args[0])
+		CommandLineOptions.Args = CommandLineOptions.Args[1:]
+	}
 
 }
 
@@ -116,10 +115,10 @@ func main() {
 	flag.BoolVar(&abtab.Verbose, "v", false, "Be verbose (to stderr)")
 
 	flag.Parse()
-  CommandLineOptions.Args = flag.Args()
+	CommandLineOptions.Args = flag.Args()
 
-  FindInputUri()
-  FindOutputUri()
+	FindInputUri()
+	FindOutputUri()
 
 	var err error
 	abtab.CmdlineOpts["input"], err = abtab.ParseURL(CommandLineOptions.Input)
@@ -132,13 +131,13 @@ func main() {
 		panic(err)
 	}
 
-	abtab.CmdlineOpts["expression"]  = CommandLineOptions.Expression
-	abtab.CmdlineOpts["sortKey"]     = CommandLineOptions.SortKey
+	abtab.CmdlineOpts["expression"] = CommandLineOptions.Expression
+	abtab.CmdlineOpts["sortKey"] = CommandLineOptions.SortKey
 	abtab.CmdlineOpts["sortNumeric"] = CommandLineOptions.SortViaNumeric
-	abtab.CmdlineOpts["numLines"]    = CommandLineOptions.SortViaNumeric // re-use of -n
+	abtab.CmdlineOpts["numLines"] = CommandLineOptions.SortViaNumeric // re-use of -n
 	abtab.CmdlineOpts["sortReverse"] = CommandLineOptions.SortReverse
-	abtab.CmdlineOpts["tmpdir"]      = CommandLineOptions.Tmpdir
-	abtab.CmdlineOpts["fields"]      = CommandLineOptions.Fields
+	abtab.CmdlineOpts["tmpdir"] = CommandLineOptions.Tmpdir
+	abtab.CmdlineOpts["fields"] = CommandLineOptions.Fields
 
 	if abtab.Verbose {
 		fmt.Fprintf(os.Stderr, "CmdlineOpts: %s\n", abtab.CmdlineOpts)

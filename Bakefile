@@ -42,15 +42,20 @@ function init_fixtures () {
   bake_echo_green "OK: obtained fixtures"
 }
 
-
-bake_task init
+bake_task init "Download sample data sets to be used as test fixtures"
 function init () {
   init_fixtures
 }
 
-
-bake_task run_tests
-function run_tests () {
+bake_task run-tests "Run the black-box tests (see ./tests)"
+function run-tests () {
   bake_cd tests
   bash run-tests.sh
+}
+
+bake_task lint-code "Run 'go fmt' on the codebase"
+function lint-code () {
+  for f in $(find . -name '*.go'); do
+    go fmt $f
+  done
 }
