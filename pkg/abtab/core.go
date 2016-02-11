@@ -1,6 +1,6 @@
 /*
-Package abtab implements a library for working with tabular data: streams of records.
 
+Package abtab implements a library for working with tabular data: streams of records.
 
 */
 package abtab
@@ -98,6 +98,10 @@ func ParseURL(u string) (*AbtabURL, error) {
 
 // Open a source for reading.
 func (self *AbtabURL) OpenRead() error {
+	// CR: is it possible to create a 'registry' so that plugins can be dynamically registered?
+	// CR: does go support plugins?  That would allow the core utils to do what they do while
+	//     'drivers' could be installed a posteri, adding in new behavior rather than
+	//     having to modify and rebuild the core utils to add new sources/sinks
 	switch {
 	case "" == self.Url.Scheme:
 		self.TabOpenRead()

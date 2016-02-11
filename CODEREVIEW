@@ -1,0 +1,68 @@
+
+choose your own adventure:
+
+* cmd/abtab/main.go
+  -> pkg/abtab/core.go
+  -> pkg/abtab/tab.go
+
+
+I'm interested in feedback:
+
+* opening remarks:
+
+  Hi, My name is Kyle Burton.  I'm an engineer in Engineering Operations.  I've
+  written a few thousand lines of code in go, nearly all one off command line
+  utilities. My most recent experience is on the JVM (Clojure and Java), JavaScript
+  and Ruby.  
+
+  I wrote this library (about three years ago) as a way to learn more about go.  
+  The spirit of this library is to let you write code that works with streams
+  of records, where a record is a map of key to value pairs.  Think of the 
+  lines of a spreadsheet, or rows from a database.  The core idea is that
+  you give the library a URL that represents a tabular source and it gives
+  you back a stream of these records.
+
+  The nice bit about this is that, to your code, the URL is opaque, 
+  you don't care how to connect to the source, you don't care what the 
+  encoding is, you just get your stream of records.   In the write
+  case, the same magic happens, you give the library a URL and you
+  can push records into it and they get written as appropraite.
+
+  With that context, here's are the areas where I was seeking feedbck (I'd
+  deeply appreciate your thoughts on what would improve me as a go dev, and
+  what would improve this codebase):
+
+* code layout - how should the files be organized?
+
+* help me write at least one go unit test for this project.
+
+* error handling conventions...Erlang likes 'let it crash' - what do 
+  St. Pike and St. Thompson suggest we do?
+
+* the overall design of the code
+
+* sql is a PITA! how to make the database drivers simpler?
+  (I have experience with JDBC, Ruby, Python and Perl, 
+    working against unknown types is not ... pleasant
+    in go atm))
+
+* logging - can you help introduce me to go's logging and configuration?
+  ... it'd be nice to implement a '--verbose' flag that configured
+      logging to be DEBUG vs OFF.  Then I can convert my embedded
+      (and often commented out) print statements to logging calls.
+
+* how do you use godoc?
+
+* the command line wrapper shell scripts are there
+  to detect if stdout is a pipe and automatically
+  pipe output through less.  Git does this and I
+  appreciate it.  Is there a more 'golang' way to do
+  this kind of thing?
+  
+* go has a profiler as part of the standrd tooling,
+  any practices around runing it or otherwise using it?
+
+* packages vs runnable binaries, I copied what I did from some other project,
+  but it feels strange to have the library code in ./pkg/abtab and the command
+  line app in ./cmd
+
