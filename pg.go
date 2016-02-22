@@ -3,9 +3,10 @@ package abtab
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"os"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 func PgOptsFromUrl(u *AbtabURL) (map[string]string, error) {

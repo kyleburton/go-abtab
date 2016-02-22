@@ -2,13 +2,14 @@ package abtab
 
 import (
 	"fmt"
-	"github.com/kyleburton/go-eval/pkg/eval"
 	"go/token"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kyleburton/go-eval/pkg/eval"
 )
 
 func init() {

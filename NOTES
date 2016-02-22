@@ -1,0 +1,14 @@
+go test
+goimports -w .
+  >> see how to get vim to run this automatically
+go fmt ./...
+  >> I think this one is already run on-save in vim
+go lint ./...
+  >> see how to get vim to run this automatically
+  go get -u github.com/golang/lint/...
+  https://github.com/golang/lint
+go get ./...
+  recursively install all dependencies
+
+
+go run cmd/abtab/main.go cat --help

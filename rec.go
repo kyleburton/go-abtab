@@ -1,8 +1,6 @@
 package abtab
 
-import (
 //"fmt"
-)
 
 type Rec struct {
 	Source  *AbtabURL
