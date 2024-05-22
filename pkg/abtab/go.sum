@@ -1,0 +1,6 @@
+github.com/kyleburton/go-eval v0.0.0-20131016153649-0aa530e9b270 h1:iLCO3M0dz1r3+Jq4DaylaUy79Zu/oRbxnsbSpTfj5VA=
+github.com/kyleburton/go-eval v0.0.0-20131016153649-0aa530e9b270/go.mod h1:dK1rtCy6H/bWxiaxE87PlZWeSMoFXfzKhcTPp0wxDBM=
+github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
+github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/sbinet/go-types v0.0.0-20120406105842-fe6453cb0a6a h1:VHPyRMC/03six0v99jgLz25gtYpEjFc5lzFieTkwWM4=
+github.com/sbinet/go-types v0.0.0-20120406105842-fe6453cb0a6a/go.mod h1:ZwypR/BerjzkD2fMuOnWEF007ijaDSR9M14PspQIFeQ=
