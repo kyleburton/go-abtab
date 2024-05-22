@@ -1,4 +1,4 @@
-module github.com/kyleburton/go-abtab/pkg/abtab
+module github.com/kyleburton/go-abtab
 
 go 1.22.0
 
