@@ -172,22 +172,21 @@ func AbtabGrepMakeExpressionFilter(inp *AbtabURL, expr string) AbtabFilterFn {
 	}
 }
 
-func AbtabGrep(args []string) {
-	inpUrl := CmdlineOpts["input"].(*AbtabURL)
-	outUrl := CmdlineOpts["output"].(*AbtabURL)
-	expression := CmdlineOpts["expression"].(string)
-
-	err := inpUrl.OpenRead()
-	if err != nil {
-		panic(err)
+func AbtabGrep(inpUrl, outUrl *AbtabURL, expression string) error {
+	if err := inpUrl.OpenRead(); err != nil {
+		return err
 	}
 
 	outUrl.Header = inpUrl.Header
-	outUrl.OpenWrite()
+	if err := outUrl.OpenWrite(); err != nil {
+		return err
+	}
 
 	var ii int64
 	for ii = 0; ii < inpUrl.SkipLines; ii += 1 {
-		fmt.Fprintf(os.Stderr, "AbtabGrep: inpUrl.SkipLines=%d; Skipping line num: %d\n", inpUrl.SkipLines, ii)
+		if Verbose {
+			fmt.Fprintf(os.Stderr, "AbtabGrep: inpUrl.SkipLines=%d; Skipping line num: %d\n", inpUrl.SkipLines, ii)
+		}
 		<-inpUrl.Stream.Recs
 	}
 
@@ -195,13 +194,16 @@ func AbtabGrep(args []string) {
 
 	for rec := range inpUrl.Stream.Recs {
 		keep, err := filterPred(rec)
-
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		if keep {
-			outUrl.WriteRecord(rec)
+			if err := outUrl.WriteRecord(rec); err != nil {
+				return err
+			}
 		}
 	}
+
+	return outUrl.Close()
 }

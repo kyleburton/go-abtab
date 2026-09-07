@@ -1,16 +1,14 @@
 package abtab
 
-func AbtabCat(args []string) {
-	inpUrl := CmdlineOpts["input"].(*AbtabURL)
-	outUrl := CmdlineOpts["output"].(*AbtabURL)
-
-	err := inpUrl.OpenRead()
-	if err != nil {
-		panic(err)
+func AbtabCat(inpUrl, outUrl *AbtabURL) error {
+	if err := inpUrl.OpenRead(); err != nil {
+		return err
 	}
 
 	outUrl.Header = inpUrl.Header
-	outUrl.OpenWrite()
+	if err := outUrl.OpenWrite(); err != nil {
+		return err
+	}
 
 	var ii int64
 	for ii = 0; ii < inpUrl.SkipLines; ii += 1 {
@@ -18,8 +16,10 @@ func AbtabCat(args []string) {
 	}
 
 	for rec := range inpUrl.Stream.Recs {
-		outUrl.WriteRecord(rec)
+		if err := outUrl.WriteRecord(rec); err != nil {
+			return err
+		}
 	}
 
-	outUrl.Close()
+	return outUrl.Close()
 }

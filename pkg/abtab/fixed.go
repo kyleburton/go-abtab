@@ -38,7 +38,7 @@ func (self *FixedWidthRecordSpec) String() string {
 	return fmt.Sprintf("FixedSpec{%s}", strings.Join(fields, ";"))
 }
 
-func FixedWidthRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) {
+func FixedWidthRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) error {
 	var file *os.File
 	var err error
 
@@ -47,7 +47,7 @@ func FixedWidthRecStream(source *AbtabURL, fname string, out chan *Rec, header [
 	} else {
 		file, err = os.Open(fname)
 		if err != nil {
-			panic(fmt.Sprintf("Error opening file: %s : %s", fname, err))
+			return AbtabError{Message: fmt.Sprintf("Error opening file: %s : %s", fname, err), CausedBy: err}
 		}
 	}
 
@@ -59,6 +59,9 @@ func FixedWidthRecStream(source *AbtabURL, fname string, out chan *Rec, header [
 	scanner := bufio.NewScanner(file)
 
 	fixedFormatSpec, err := source.FixedWidthParseFieldSpec()
+	if err != nil {
+		return err
+	}
 
 	if headerProvided {
 		source.SetHeader(fixedFormatSpec.ParseString(header[0]))
@@ -70,7 +73,7 @@ func FixedWidthRecStream(source *AbtabURL, fname string, out chan *Rec, header [
 		if !scanner.Scan() {
 			// empty source
 			close(out)
-			return
+			return nil
 		}
 
 		headerLine := scanner.Text()
@@ -115,6 +118,8 @@ func FixedWidthRecStream(source *AbtabURL, fname string, out chan *Rec, header [
 		close(out)
 
 	}()
+
+	return nil
 }
 
 func FixedWidthFilePath(u *AbtabURL) string {
@@ -145,7 +150,9 @@ func (self *AbtabURL) FixedWidthOpenRead() error {
 	qs := self.Url.Query()
 	header, headerProvided := qs["header"]
 
-	FixedWidthRecStream(self, fileName, self.Stream.Recs, header, headerProvided)
+	if err := FixedWidthRecStream(self, fileName, self.Stream.Recs, header, headerProvided); err != nil {
+		return err
+	}
 
 	skipLines, ok := qs["skipLines"]
 	if ok {
@@ -172,7 +179,7 @@ func (self *AbtabURL) FixedWidthParseFieldSpec() (spec *FixedWidthRecordSpec, er
 
 	_, ok := qs["fields"]
 	if !ok {
-		panic(fmt.Sprintf("FixedWidth: Error: a field specification must be provided!"))
+		return nil, AbtabError{Message: "FixedWidth: Error: a field specification must be provided!"}
 	}
 
 	fields := self.Url.Query()["fields"]
@@ -182,7 +189,7 @@ func (self *AbtabURL) FixedWidthParseFieldSpec() (spec *FixedWidthRecordSpec, er
 	}
 
 	if len(fields) < 1 {
-		panic(fmt.Sprintf("FixedWidth: Error invalid field specification (blank?): '%s'", fields))
+		return nil, AbtabError{Message: fmt.Sprintf("FixedWidth: Error invalid field specification (blank?): '%s'", fields)}
 	}
 
 	fieldSpecs := strings.Split(fields[0], ",")
@@ -195,23 +202,23 @@ func (self *AbtabURL) FixedWidthParseFieldSpec() (spec *FixedWidthRecordSpec, er
 	for _, fspec := range fieldSpecs {
 		parts := strings.SplitN(fspec, ":", 2)
 		if len(parts) < 2 {
-			panic(fmt.Sprintf("FixedWidth: Error invalid field specification (no start-end positions?): '%s'", fields))
+			return nil, AbtabError{Message: fmt.Sprintf("FixedWidth: Error invalid field specification (no start-end positions?): '%s'", fields)}
 		}
 
 		name := parts[0]
 		startAndEnd := strings.SplitN(parts[1], "-", 2)
 		if len(startAndEnd) < 2 {
-			panic(fmt.Sprintf("FixedWidth: Error invalid field specification (missing start or end position?): '%s'", fields))
+			return nil, AbtabError{Message: fmt.Sprintf("FixedWidth: Error invalid field specification (missing start or end position?): '%s'", fields)}
 		}
 
 		start, err := strconv.Atoi(startAndEnd[0])
 		if err != nil {
-			panic(fmt.Sprintf("FixedWidth: Error invalid start-position for field=%s start=%s fspec=%s", name, startAndEnd[0], fspec))
+			return nil, AbtabError{Message: fmt.Sprintf("FixedWidth: Error invalid start-position for field=%s start=%s fspec=%s", name, startAndEnd[0], fspec), CausedBy: err}
 		}
 
 		end, err := strconv.Atoi(startAndEnd[1])
 		if err != nil {
-			panic(fmt.Sprintf("FixedWidth: Error invalid end-position for field=%s start=%s fspec=%s", name, startAndEnd[1], fspec))
+			return nil, AbtabError{Message: fmt.Sprintf("FixedWidth: Error invalid end-position for field=%s start=%s fspec=%s", name, startAndEnd[1], fspec), CausedBy: err}
 		}
 
 		if Verbose {
@@ -219,7 +226,7 @@ func (self *AbtabURL) FixedWidthParseFieldSpec() (spec *FixedWidthRecordSpec, er
 		}
 
 		if end-start < 1 {
-			panic(fmt.Sprintf("FixedWidth: Error field width is zero or negative: %s start=%d end=%d", name, start, end))
+			return nil, AbtabError{Message: fmt.Sprintf("FixedWidth: Error field width is zero or negative: %s start=%d end=%d", name, start, end)}
 		}
 
 		spec.Fields = append(spec.Fields, &FixedWidthFieldSpec{
@@ -288,7 +295,7 @@ func (self *FixedWidthRecordSpec) ParseString(s string) (fields []string) {
 
 		if Verbose {
 			fmt.Fprintf(os.Stderr, "FixedWidthRecordSpec.ParseString: val='%s' idx=%d fieldSpec=%s s.%d='%s'\n",
-				val, idx, fieldSpec, s, len(s))
+				val, idx, fieldSpec, len(s), s)
 		}
 
 	}
@@ -335,7 +342,7 @@ func (self *AbtabURL) FixedWidthOpenWrite() error {
 	} else {
 		file, err = os.Create(fileName)
 		if err != nil {
-			panic(fmt.Sprintf("Error opening file: %s : %s", fileName, err))
+			return AbtabError{Message: fmt.Sprintf("Error opening file: %s : %s", fileName, err), CausedBy: err}
 		}
 	}
 
@@ -344,6 +351,9 @@ func (self *AbtabURL) FixedWidthOpenWrite() error {
 	}
 
 	fixedFormatSpec, err = self.FixedWidthParseFieldSpec()
+	if err != nil {
+		return err
+	}
 	if Verbose {
 		fmt.Fprintf(os.Stderr, "FixedWidthOpenWrite: fixedFormatSpec=%s\n", fixedFormatSpec)
 	}

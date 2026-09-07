@@ -1,30 +1,15 @@
 /*
 Package abtab implements a library for working with tabular data: streams of records.
-
-
 */
 package abtab
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 )
 
-/*
-  Map for holding parsed command line parameters.
-*/
-type CmdlineOptsType map[string]interface{}
-
-/*
-  Map for holding parsed command line parameters.
-*/
-var CmdlineOpts CmdlineOptsType = CmdlineOptsType{
-	"input":  "/dev/stdin",
-	"output": "/dev/stdout",
-}
-
+// Verbose enables diagnostic logging to stderr across the package.
 var Verbose bool = false
 
 // Customized error type.
@@ -36,6 +21,11 @@ type AbtabError struct {
 // Implement the Error interface for AbtabError
 func (e AbtabError) Error() string {
 	return e.Message
+}
+
+// Unwrap exposes CausedBy so errors.Is/errors.As work against AbtabError.
+func (e AbtabError) Unwrap() error {
+	return e.CausedBy
 }
 
 // Function type for driver's write capability.
@@ -98,78 +88,37 @@ func ParseURL(u string) (*AbtabURL, error) {
 
 // Open a source for reading.
 func (self *AbtabURL) OpenRead() error {
-	switch {
-	case "" == self.Url.Scheme:
-		self.TabOpenRead()
-		return nil
-		break
-	case "tab" == self.Url.Scheme:
-		self.TabOpenRead()
-		return nil
-		break
-	case "fixed" == self.Url.Scheme:
-		self.FixedWidthOpenRead()
-		return nil
-		break
+	switch self.Url.Scheme {
+	case "", "tab":
+		return self.TabOpenRead()
+	case "csv":
+		return self.CsvOpenRead()
+	case "fixed":
+		return self.FixedWidthOpenRead()
+	case "pg":
+		return self.PgOpenRead()
 	default:
 		return AbtabError{Message: fmt.Sprintf("Error: unrecognized scheme: '%s'", self.Url.Scheme)}
-		break
-	case "csv" == self.Url.Scheme:
-		self.CsvOpenRead()
-		break
-		//  case "fixed" == self.Url.Scheme:
-		//    self.FixedOpenRead()
-		//    break;
-	case "pg" == self.Url.Scheme:
-		self.PgOpenRead()
-		break
-		//  case "mysql" == self.Url.Scheme:
-		//    self.MysqlOpenRead()
-		//    break;
-		//    return nil
 	}
-	return nil
 }
 
 // Open a source for writing.
 func (self *AbtabURL) OpenWrite() error {
-	switch {
-	case "" == self.Url.Scheme:
-		self.TabOpenWrite()
-		return nil
-		break
-	case "tab" == self.Url.Scheme:
-		self.TabOpenWrite()
-		return nil
-		break
-	case "fixed" == self.Url.Scheme:
-		self.FixedWidthOpenWrite()
-		return nil
-		break
+	switch self.Url.Scheme {
+	case "", "tab":
+		return self.TabOpenWrite()
+	case "csv":
+		return self.CsvOpenWrite()
+	case "fixed":
+		return self.FixedWidthOpenWrite()
 	default:
 		return AbtabError{Message: fmt.Sprintf("Error: unrecognized scheme: '%s'", self.Url.Scheme)}
-		break
-	case "csv" == self.Url.Scheme:
-		self.CsvOpenWrite()
-		break
-		//  case "fixed" == self.Url.Scheme:
-		//    self.FixedOpenWrite()
-		//    break;
-		//  case "pg" == self.Url.Scheme:
-		//    self.PgOpenWrite()
-		//    break;
-		//  case "mysql" == self.Url.Scheme:
-		//    self.MysqlOpenWrite()
-		//    break;
-		//    return nil
 	}
-	return nil
 }
 
 // Generate a temporary file name.
-func TempFileName() (string, error) {
-	tmpdir := CmdlineOpts["tmpdir"].(string)
-	file, err := ioutil.TempFile(tmpdir, "abtab.tmp.")
+func TempFileName(tmpdir string) (string, error) {
+	file, err := os.CreateTemp(tmpdir, "abtab.tmp.")
 	if err != nil {
 		return "", err
 	}

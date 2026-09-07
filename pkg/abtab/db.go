@@ -9,7 +9,7 @@ func DbRecStream(u *AbtabURL, db *sql.DB, numCols int, rows *sql.Rows) {
 	sqlFields := make([]sql.NullString, numCols)
 
 	for rows.Next() {
-		scanArgs := make([]interface{}, numCols)
+		scanArgs := make([]any, numCols)
 		for i, _ := range sqlFields {
 			scanArgs[i] = &sqlFields[i]
 		}

@@ -1,43 +1,17 @@
-if [ -z "$GOPATH" ]; then
-  echo "Error: GOPATH is not set"
-  exit 1
-fi
-
-
-if [ ! -d "$GOPATH/bin" ]; then
-  echo "Error: \$GOPATH/bin does not exist, you can create it with:"
-  echo "  mkdir $GOPATH/bin"
-  exit 1
-fi
-
-go get -u github.com/kyleburton/go-abtab/cmd/abtab
-
-for b in cat cut grep head sort tail view; do
-
-  cat >$GOPATH/bin/ab$b <<HERE
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -eu
+cd "$(dirname "$0")"
 
-# if stdout is a termianl, then we automatically pipe through less
-if [ -t 1 ]; then
-  "$GOPATH/bin/abtab" -task $b "\$@" | less
-else
-  "$GOPATH/bin/abtab" -task $b "\$@"
+go install ./cmd/...
+
+BIN_DIR="$(go env GOBIN)"
+if [ -z "$BIN_DIR" ]; then
+  BIN_DIR="$(go env GOPATH)/bin"
 fi
-HERE
 
-  chmod 755 $GOPATH/bin/ab$b
+echo "Installed to $BIN_DIR:"
+for d in cmd/*/; do
+  echo "  $(basename "$d")"
 done
-
-
-cat >$GOPATH/bin/abfillrates <<HERE
-#!/usr/bin/env bash
-
-set -eu
-ROOT="\$(dirname \$( cd "\$( dirname "${BASH_SOURCE[0]}" )" && pwd ))"
-
-"$GOPATH/bin/abtab" -task fill-rates "\$@"
-HERE
-
-chmod 755 $GOPATH/bin/abfillrates
+echo "Make sure $BIN_DIR is on your PATH."

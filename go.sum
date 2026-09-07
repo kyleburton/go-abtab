@@ -1,0 +1,14 @@
+github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
+github.com/alecthomas/assert/v2 v2.11.0/go.mod h1:Bze95FyfUr7x34QZrjL+XP+0qgp/zg8yS+TtBj1WA3k=
+github.com/alecthomas/kong v1.16.1 h1:ixhCt93XkJ98kGposQ54+bl0IK6XwqB40AsMynU7Z8E=
+github.com/alecthomas/kong v1.16.1/go.mod h1:wrlbXem1CWqUV5Vbmss5ISYhsVPkBb1Yo7YKJghju2I=
+github.com/alecthomas/repr v0.5.2 h1:SU73FTI9D1P5UNtvseffFSGmdNci/O6RsqzeXJtP0Qs=
+github.com/alecthomas/repr v0.5.2/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
+github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
+github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
+github.com/kyleburton/go-eval v0.0.0-20131016153649-0aa530e9b270 h1:iLCO3M0dz1r3+Jq4DaylaUy79Zu/oRbxnsbSpTfj5VA=
+github.com/kyleburton/go-eval v0.0.0-20131016153649-0aa530e9b270/go.mod h1:dK1rtCy6H/bWxiaxE87PlZWeSMoFXfzKhcTPp0wxDBM=
+github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
+github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
+github.com/sbinet/go-types v0.0.0-20120406105842-fe6453cb0a6a h1:VHPyRMC/03six0v99jgLz25gtYpEjFc5lzFieTkwWM4=
+github.com/sbinet/go-types v0.0.0-20120406105842-fe6453cb0a6a/go.mod h1:ZwypR/BerjzkD2fMuOnWEF007ijaDSR9M14PspQIFeQ=

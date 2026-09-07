@@ -2,10 +2,8 @@ package abtab
 
 import (
 	"fmt"
+	"io"
 )
-
-func init() {
-}
 
 type fillRateRow struct {
 	fieldNum  int
@@ -14,12 +12,9 @@ type fillRateRow struct {
 	fillRate  string
 }
 
-func AbtabFillRates(args []string) {
-	inpUrl := CmdlineOpts["input"].(*AbtabURL)
-
-	err := inpUrl.OpenRead()
-	if err != nil {
-		panic(err)
+func AbtabFillRates(inpUrl *AbtabURL, w io.Writer) error {
+	if err := inpUrl.OpenRead(); err != nil {
+		return err
 	}
 
 	var ii int64
@@ -30,7 +25,7 @@ func AbtabFillRates(args []string) {
 	var numRecs int64 = 0
 	fillRates := make(map[int]int64)
 
-	for idx, _ := range inpUrl.Header {
+	for idx := range inpUrl.Header {
 		fillRates[idx] = 0
 	}
 
@@ -60,7 +55,7 @@ func AbtabFillRates(args []string) {
 		})
 	}
 
-	fmt.Printf("Fill Rates file: %s, Records: %d\n", inpUrl.OriginalUrl, numRecs)
+	fmt.Fprintf(w, "Fill Rates file: %s, Records: %d\n", inpUrl.OriginalUrl, numRecs)
 
 	maxCountWidth := 0
 	maxRateWidth := 0
@@ -74,7 +69,7 @@ func AbtabFillRates(args []string) {
 	}
 
 	for _, row := range fillRateRows {
-		fmt.Printf("[% 2d] % *s : % *s % *s%%\n",
+		fmt.Fprintf(w, "[% 2d] % *s : % *s % *s%%\n",
 			row.fieldNum,
 			-1*maxFieldWidth,
 			row.fieldName,
@@ -83,4 +78,6 @@ func AbtabFillRates(args []string) {
 			maxRateWidth,
 			row.fillRate)
 	}
+
+	return nil
 }

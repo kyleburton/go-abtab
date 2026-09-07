@@ -127,7 +127,7 @@ func (self *AbtabURL) PgOpenRead() error {
 	sqlStmt := fmt.Sprintf("SELECT * FROM %s.%s LIMIT 0", opts["schemaName"], opts["tableName"])
 	rows, err := db.Query(sqlStmt)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "PgOpenRead: Query Failed: sqlStmt='%s' : error=%h\n", sqlStmt, err)
+		fmt.Fprintf(os.Stderr, "PgOpenRead: Query Failed: sqlStmt='%s' : error=%s\n", sqlStmt, err)
 		panic(err)
 	}
 
@@ -166,13 +166,13 @@ func (self *AbtabURL) PgOpenRead() error {
 	}
 
 	if Verbose {
-		fmt.Fprintf(os.Stderr, "PgOpenRead: db=%s\n", db)
+		fmt.Fprintf(os.Stderr, "PgOpenRead: db=%v\n", db)
 		fmt.Fprintf(os.Stderr, "PgOpenRead: sqlStmt='%s'\n", sqlStmt)
 	}
 
 	rows, err = db.Query(sqlStmt)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "PgOpenRead: Query Failed: sqlStmt='%s' : error=%h\n", sqlStmt, err)
+		fmt.Fprintf(os.Stderr, "PgOpenRead: Query Failed: sqlStmt='%s' : error=%s\n", sqlStmt, err)
 		panic(err)
 	}
 

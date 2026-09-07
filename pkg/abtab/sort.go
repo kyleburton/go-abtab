@@ -7,9 +7,8 @@ import (
 	"strings"
 )
 
-func AbtabSortSort(inp *AbtabURL, tofile string, keys []string) (*AbtabURL, error) {
-	tmpdir := CmdlineOpts["tmpdir"].(string)
-	tmpfile, err := TempFileName()
+func AbtabSortSort(inp *AbtabURL, tofile string, keys []string, tmpdir string, numeric, reverse bool) (*AbtabURL, error) {
+	tmpfile, err := TempFileName(tmpdir)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +50,11 @@ func AbtabSortSort(inp *AbtabURL, tofile string, keys []string) (*AbtabURL, erro
 	// os.Remove(tmpfile)
 	sortCmd := []string{"-T", tmpdir, "-t", "\t", "-o", tofile}
 
-	sortNumeric := CmdlineOpts["sortNumeric"].(string)
-	if sortNumeric == "true" {
+	if numeric {
 		sortCmd = append(sortCmd, "-n")
 	}
 
-	sortReverse := CmdlineOpts["sortReverse"].(string)
-	if sortReverse == "true" {
+	if reverse {
 		sortCmd = append(sortCmd, "-r")
 	}
 
@@ -74,17 +71,15 @@ func AbtabSortSort(inp *AbtabURL, tofile string, keys []string) (*AbtabURL, erro
 	return inp, nil
 }
 
-func AbtabSort(args []string) error {
-	sortKey := CmdlineOpts["sortKey"].(string)
-	unsortedInp := CmdlineOpts["input"].(*AbtabURL)
-	outp := CmdlineOpts["output"].(*AbtabURL)
-
-	tmpfile, err := TempFileName()
+func AbtabSort(unsortedInp, outp *AbtabURL, sortKey, tmpdir string, numeric, reverse bool) error {
+	tmpfile, err := TempFileName(tmpdir)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("AbtabSort: key=%s\n", sortKey)
+	if Verbose {
+		fmt.Fprintf(os.Stderr, "AbtabSort: key=%s\n", sortKey)
+	}
 
 	err = unsortedInp.OpenRead()
 	if err != nil {
@@ -92,11 +87,15 @@ func AbtabSort(args []string) error {
 	}
 
 	outp.Header = unsortedInp.Header
-	outp.OpenWrite()
+	if err := outp.OpenWrite(); err != nil {
+		return err
+	}
 
-	unsortedInp.Close()
+	if err := unsortedInp.Close(); err != nil {
+		return err
+	}
 
-	sortedInput, err := AbtabSortSort(unsortedInp, tmpfile, strings.Split(sortKey, ","))
+	sortedInput, err := AbtabSortSort(unsortedInp, tmpfile, strings.Split(sortKey, ","), tmpdir, numeric, reverse)
 	if err != nil {
 		return err
 	}

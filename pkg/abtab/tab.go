@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) {
+func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string, headerProvided bool) error {
 	var file *os.File
 	var err error
 
@@ -18,7 +18,7 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 		//fmt.Printf("Opening: %s\n", file)
 		file, err = os.Open(fname)
 		if err != nil {
-			panic(fmt.Sprintf("Error opening file: %s : %s", fname, err))
+			return AbtabError{Message: fmt.Sprintf("Error opening file: %s : %s", fname, err), CausedBy: err}
 		}
 	}
 
@@ -39,7 +39,7 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 		if !scanner.Scan() {
 			// empty source
 			close(out)
-			return
+			return nil
 		}
 
 		fields := strings.Split(scanner.Text(), source.FieldSeparator)
@@ -82,6 +82,8 @@ func TabRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 		close(out)
 
 	}()
+
+	return nil
 }
 
 func TabFilePath(u *AbtabURL) string {
@@ -125,7 +127,9 @@ func (self *AbtabURL) TabOpenRead() error {
 		self.RecordSeparator = recSep[0]
 	}
 
-	TabRecStream(self, fileName, self.Stream.Recs, header, headerProvided)
+	if err := TabRecStream(self, fileName, self.Stream.Recs, header, headerProvided); err != nil {
+		return err
+	}
 
 	skipLines, ok := qs["skipLines"]
 	if ok {
@@ -160,7 +164,7 @@ func (self *AbtabURL) TabOpenWrite() error {
 	} else {
 		file, err = os.Create(fileName)
 		if err != nil {
-			panic(fmt.Sprintf("Error opening file: %s : %s", fileName, err))
+			return AbtabError{Message: fmt.Sprintf("Error opening file: %s : %s", fileName, err), CausedBy: err}
 		}
 	}
 

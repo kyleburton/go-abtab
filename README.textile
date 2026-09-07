@@ -5,10 +5,12 @@ Unix utilities that process 'abstracted tables', or streams of records.  In the 
 h1. Installation
 
 <pre>
-go get github.com/kyleburton/go-abtab/cmd/abtab
-cd $GOPATH/src/github.com/kyleburton/go-abtab
+git clone https://github.com/kyleburton/go-abtab
+cd go-abtab
 bash install.sh
 </pre>
+
+This builds and installs each command (@abcat@, @abcut@, @abfillrates@, @abgrep@, @abhead@, @absort@, @abtail@, @abview@) via @go install ./cmd/...@, into @$(go env GOBIN)@ (or @$(go env GOPATH)/bin@ if @GOBIN@ isn't set). Make sure that directory is on your @PATH@.
 
 h1. Overview
 

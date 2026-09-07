@@ -17,7 +17,7 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 	csvFile, err := os.Open(fname)
 
 	if err != nil {
-		panic(err)
+		return AbtabError{Message: fmt.Sprintf("Error opening file: %s : %s", fname, err), CausedBy: err}
 	}
 
 	reader := csv.NewReader(csvFile)
@@ -36,7 +36,7 @@ func CsvRecStream(source *AbtabURL, fname string, out chan *Rec, header []string
 		fields, err := reader.Read()
 
 		if err != nil {
-			panic(err)
+			return AbtabError{Message: fmt.Sprintf("Error reading header from file: %s : %s", fname, err), CausedBy: err}
 		}
 		source.SetHeader(fields)
 	}
@@ -92,7 +92,9 @@ func (self *AbtabURL) CsvOpenRead() error {
 	}
 
 	header, headerProvided := qs["header"]
-	CsvRecStream(self, fileName, self.Stream.Recs, header, headerProvided)
+	if err := CsvRecStream(self, fileName, self.Stream.Recs, header, headerProvided); err != nil {
+		return err
+	}
 
 	self.WriteRecord = func(r *Rec) error {
 		return AbtabError{Message: "Error: Csv: not open for writing!"}
@@ -122,7 +124,7 @@ func (self *AbtabURL) CsvOpenWrite() error {
 	} else {
 		file, err = os.Create(fileName)
 		if err != nil {
-			panic(fmt.Sprintf("Error opening file: %s : %s", fileName, err))
+			return AbtabError{Message: fmt.Sprintf("Error opening file: %s : %s", fileName, err), CausedBy: err}
 		}
 	}
 

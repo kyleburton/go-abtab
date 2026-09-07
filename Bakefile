@@ -55,7 +55,15 @@ function run-tests () {
 
 bake_task lint-code "Run 'go fmt' on the codebase"
 function lint-code () {
-  for f in $(find . -name '*.go'); do
-    go fmt $f
-  done
+  go fmt ./...
+}
+
+bake_task build "Build all commands (cmd/*)"
+function build () {
+  go build ./...
+}
+
+bake_task install "Build and install all commands onto \$GOPATH/bin"
+function install () {
+  bash install.sh
 }

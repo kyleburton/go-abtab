@@ -1,24 +1,13 @@
 package abtab
 
-import (
-	"strconv"
-)
-
-func AbtabHead(args []string) {
-	inpUrl := CmdlineOpts["input"].(*AbtabURL)
-	outUrl := CmdlineOpts["output"].(*AbtabURL)
-
-	err := inpUrl.OpenRead()
-	if err != nil {
-		panic(err)
+func AbtabHead(inpUrl, outUrl *AbtabURL, numLines int64) error {
+	if err := inpUrl.OpenRead(); err != nil {
+		return err
 	}
 
 	outUrl.Header = inpUrl.Header
-	outUrl.OpenWrite()
-
-	numLines, err := strconv.ParseInt(CmdlineOpts["numLines"].(string), 10, 64)
-	if err != nil {
-		panic(err)
+	if err := outUrl.OpenWrite(); err != nil {
+		return err
 	}
 
 	var ii int64
@@ -31,9 +20,13 @@ func AbtabHead(args []string) {
 			break
 		}
 		numLines -= 1
-		outUrl.WriteRecord(rec)
+		if err := outUrl.WriteRecord(rec); err != nil {
+			return err
+		}
 	}
 
-	inpUrl.Close()
-	outUrl.Close()
+	if err := inpUrl.Close(); err != nil {
+		return err
+	}
+	return outUrl.Close()
 }
