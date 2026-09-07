@@ -15,7 +15,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("Filter an abtab record stream by an expression."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("Filter an abtab record stream by an expression.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI, outputURI := CLI.IOFlags.Resolve()

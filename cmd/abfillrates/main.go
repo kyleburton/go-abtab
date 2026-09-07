@@ -16,7 +16,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("Report field fill rates for an abtab record stream."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("Report field fill rates for an abtab record stream.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI := CLI.InputFlags.Resolve()

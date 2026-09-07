@@ -15,7 +15,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("Emit the header plus the last N records of an abtab record stream."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("Emit the header plus the last N records of an abtab record stream.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI, outputURI := CLI.IOFlags.Resolve()

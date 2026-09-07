@@ -18,7 +18,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("Sort an abtab record stream by one or more key fields."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("Sort an abtab record stream by one or more key fields.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI, outputURI := CLI.IOFlags.Resolve()

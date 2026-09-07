@@ -16,7 +16,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("View an abtab record stream in portrait layout."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("View an abtab record stream in portrait layout.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI := CLI.InputFlags.Resolve()

@@ -14,7 +14,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("Concatenate an abtab record stream, like cat."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("Concatenate an abtab record stream, like cat.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI, outputURI := CLI.IOFlags.Resolve()

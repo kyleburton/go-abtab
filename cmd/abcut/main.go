@@ -15,7 +15,7 @@ var CLI struct {
 }
 
 func main() {
-	kong.Parse(&CLI, kong.Description("Cut fields out of an abtab record stream, by name or position."))
+	kong.Parse(&CLI, kong.Description(cli.WithEncodingsHelp("Cut fields out of an abtab record stream, by name or position.")))
 	abtab.Verbose = CLI.Verbose
 
 	inputURI, outputURI := CLI.IOFlags.Resolve()
